@@ -1,0 +1,42 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# builds & artifacts
+dist/
+build/
+.next/
+.nuxt/
+.output/
+.angular/
+quasar/.quasar/
+coverage/
+artifacts/
+playwright-report/
+test-results/
+
+# env & secrets
+.env
+.env.*
+!.env.example
+
+# databases & storage (local only)
+*.sqlite
+*.sqlite-journal
+data/minio/
+data/postgres/
+
+# caches
+.cache/
+.turbo/
+.eslintcache
+*.tsbuildinfo
+
+# generated (committed on purpose: packages/api-client — see ADR-004)
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
