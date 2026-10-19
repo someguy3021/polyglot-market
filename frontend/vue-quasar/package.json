@@ -1,0 +1,28 @@
+{
+  "name": "@showcase/frontend-vue-quasar",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Флагманский фронт Polyglot Market: Vue 3 + Quasar, полный функционал маркетплейса (фича 07).",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@quasar/extras": "^1.16.12",
+    "@showcase/api-client": "workspace:*",
+    "pinia": "^2.2.6",
+    "quasar": "^2.17.0",
+    "vue": "^3.5.0",
+    "vue-router": "^4.4.0"
+  },
+  "devDependencies": {
+    "@quasar/vite-plugin": "^1.7.0",
+    "@vitejs/plugin-vue": "^5.2.0",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0",
+    "vue-tsc": "^2.1.10"
+  }
+}
