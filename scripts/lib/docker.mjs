@@ -2,7 +2,6 @@
 import { spawnSync } from "node:child_process";
 import { tryCmd, detectWslDistro } from "./exec.mjs";
 import { config } from "./config.mjs";
-
 export function dockerRunner() {
   if (tryCmd("docker", ["--version"])) return { kind: "native" };
   if (process.platform === "win32") {
@@ -27,4 +26,19 @@ export function toWslPath(p) {
   return p
     .replace(/^([A-Za-z]):\\/, (_m, disk) => `/mnt/${disk.toLowerCase()}/`)
     .replaceAll("\\", "/");
+}
+
+// WSL-VM гаснет при отсутствии процессов — вместе с ней умирают контейнеры и
+// проброс портов. Держим VM живой отвязанным (setsid) sleep'ом — процесс-якорь
+// переживает завершение запустившего wsl.exe (безвредный sleep 3600).
+export function keepWslAlive(distro) {
+  if (process.platform !== "win32") return;
+  spawnSync("wsl.exe", [
+    "-d",
+    distro,
+    "-e",
+    "sh",
+    "-c",
+    "setsid nohup sleep 3600 >/dev/null 2>&1 </dev/null &",
+  ], { windowsHide: true });
 }

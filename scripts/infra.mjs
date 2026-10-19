@@ -4,7 +4,7 @@
 import { spawn, execSync } from "node:child_process";
 import { mkdirSync, existsSync, readFileSync, writeFileSync, unlinkSync, openSync } from "node:fs";
 import { join } from "node:path";
-import { dockerRunner, dockerRun, toWslPath } from "./lib/docker.mjs";
+import { dockerRunner, dockerRun, toWslPath, keepWslAlive } from "./lib/docker.mjs";
 import { tryCmd } from "./lib/exec.mjs";
 
 const ROOT = join(import.meta.dirname, "..");
@@ -53,6 +53,7 @@ async function up() {
     console.error("docker недоступен — запустите `pnpm doctor`");
     process.exit(1);
   }
+  if (runner.kind === "wsl") keepWslAlive(runner.distro);
   try {
     dockerRun(runner, ["compose", "-f", composePath(runner), "up", "-d", "--wait"]);
     console.log("infra: postgres :5432, minio api :9002 (console :9003) — готовы (docker).");
