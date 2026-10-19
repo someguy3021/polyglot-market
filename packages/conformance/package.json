@@ -1,0 +1,22 @@
+{
+  "name": "@showcase/conformance",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Conformance-раннер: сверяет ответы любого бекенда с контрактом OpenAPI (ADR-005).",
+  "type": "module",
+  "scripts": {
+    "test": "tsx src/run.ts",
+    "lint:spec": "spectral lint -r ../../.spectral.yaml ../../shared/api-spec/openapi.yaml"
+  },
+  "dependencies": {
+    "@apidevtools/swagger-parser": "^10.1.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  },
+  "devDependencies": {
+    "@stoplight/spectral-cli": "^6.14.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "@types/node": "^24.0.0"
+  }
+}

@@ -1,0 +1,26 @@
+# Spectral: контракт обязан быть не только синтаксически валиден (oas), но и полон
+# для генерации клиентов: у каждой операции — summary и теги (ADR-004).
+extends:
+  - spectral:oas
+rules:
+  info-contact: off
+  oas3-api-servers: off
+  operation-description: off
+  operation-summary:
+    description: У каждой операции должен быть summary (читается скринерами и людьми).
+    given: $.paths[*][*]
+    severity: error
+    type: style
+    then:
+      field: summary
+      function: truthy
+  operation-tags:
+    description: У каждой операции должен быть хотя бы один тег.
+    given: $.paths[*][*]
+    severity: error
+    type: style
+    then:
+      field: tags
+      function: length
+      functionOptions:
+        min: 1

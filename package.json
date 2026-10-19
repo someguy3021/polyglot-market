@@ -17,7 +17,7 @@
     "db:seed": "node scripts/db.mjs seed",
     "db:reset": "node scripts/db.mjs reset",
     "generate:clients": "node scripts/generate-clients.mjs",
-    "spec:lint": "pnpm --dir packages/conformance exec spectral lint ../../shared/api-spec/openapi.yaml",
+    "spec:lint": "pnpm --dir packages/conformance run lint:spec",
     "conformance": "pnpm --dir packages/conformance test",
     "start": "node scripts/manager.mjs",
     "lint": "eslint .",
