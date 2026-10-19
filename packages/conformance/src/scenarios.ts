@@ -23,7 +23,8 @@ export const scenarios: Scenario[] = [
     run: async () => {
       const res = await call("GET", "/health");
       expectStatus(res, 200);
-      expect(errors("getHealth", res), `невалидный /health: ${errors("getHealth", res).join("; ")}`);
+      const errs = validate("Health", res.body);
+      expect(errs.length === 0, `невалидный /health: ${errs.join("; ")}`);
     },
   },
   {
@@ -130,9 +131,12 @@ export const scenarios: Scenario[] = [
   {
     name: "cart: гостевая корзина по X-Cart-Token (add → get → patch → delete)",
     run: async () => {
-      const list = await call("GET", "/products?perPage=2");
-      const [p1, p2] = (list.body as { data?: { id?: string }[] }).data ?? [];
-      expect(p1?.id && p2?.id, "нужны два товара из сидов");
+      const list = await call("GET", "/products?perPage=20");
+      const candidates = ((list.body as { data?: { id?: string; stock?: number }[] }).data ?? []).filter(
+        (p) => (p.stock ?? 0) >= 5,
+      );
+      const [p1, p2] = candidates;
+      expect(p1?.id && p2?.id, "нужны два товара из сидов со stock >= 5");
       const add = await call("POST", "/cart/items", { body: { productId: p1!.id, quantity: 2 } });
       expectStatus(add, 201);
       const token = add.headers.get("x-cart-token") ?? add.headers.get("X-Cart-Token");

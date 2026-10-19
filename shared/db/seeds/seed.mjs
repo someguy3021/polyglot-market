@@ -35,7 +35,8 @@ await pool.query(`
 `);
 
 console.log("seed: пользователи и магазины…");
-const passwordHash = bcrypt.hashSync(DEMO_PASSWORD, 10);
+// $2y-префикс: Laravel 11+ принимает только его; bcryptjs понимает 2a/2b/2y одинаково.
+const passwordHash = bcrypt.hashSync(DEMO_PASSWORD, 10).replace(/^\$2[ab]\$/, "$2y$");
 const userIds = {};
 for (const u of users) {
   const { rows } = await pool.query(

@@ -47,17 +47,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required: [status, service, time]
-                properties:
-                  status:
-                    type: string
-                    enum: [ok]
-                  service:
-                    type: string
-                  time:
-                    type: string
-                    format: date-time
+                $ref: "#/components/schemas/Health"
 
   /auth/register:
     post:
@@ -1029,6 +1019,18 @@ components:
           schema:
             $ref: "#/components/schemas/Error"
   schemas:
+    Health:
+      type: object
+      required: [status, service, time]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        service:
+          type: string
+        time:
+          type: string
+          format: date-time
     UserRole:
       type: string
       enum: [buyer, seller, moderator, admin]

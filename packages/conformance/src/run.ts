@@ -6,10 +6,16 @@ import { scenarios, type ScenarioResult, baseUrl } from "./scenarios.js";
 const spec = await loadSpec();
 const operationCount = Object.values((spec as { paths: Record<string, Record<string, unknown>> }).paths)
   .reduce((acc, item) => acc + Object.keys(item).length, 0);
-console.log(`Conformance против ${baseUrl()} — операций в контракте: ${operationCount}\n`);
+// CONFORMANCE_TAGS="service,auth" — прогнать только группы (префикс сценария до ':')
+const tags = (process.env.CONFORMANCE_TAGS ?? "")
+  .split(",")
+  .map((t) => t.trim())
+  .filter(Boolean);
+const selected = tags.length ? scenarios.filter((s) => tags.some((t) => s.name.startsWith(`${t}:`))) : scenarios;
+console.log(`Conformance против ${baseUrl()} — операций в контракте: ${operationCount}, сценариев: ${selected.length}${tags.length ? ` (теги: ${tags.join(", ")})` : ""}\n`);
 
 const results: ScenarioResult[] = [];
-for (const scenario of scenarios) {
+for (const scenario of selected) {
   const started = Date.now();
   try {
     await scenario.run();
