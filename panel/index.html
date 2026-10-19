@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Polyglot Market — панель управления</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Polyglot Market</h1>
+      <p class="sub">1 контракт · 2 бекенда · 7 фронтов — <span id="setup-note"></span></p>
+    </div>
+    <button id="stop-all" class="ghost">Остановить всё</button>
+  </header>
+
+  <main>
+    <section id="backends" class="group">
+      <h2>Бекенды <small>активен только один (ADR-006)</small></h2>
+      <div class="cards" id="backend-cards"></div>
+    </section>
+
+    <section class="group">
+      <h2>Фронтенды</h2>
+      <div class="cards" id="frontend-cards"></div>
+    </section>
+
+    <section class="group">
+      <h2>Порты</h2>
+      <table id="port-table">
+        <thead><tr><th>Приложение</th><th>Порт</th><th>Статус</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section class="group" id="logs-group" hidden>
+      <h2>Логи: <span id="log-app"></span>
+        <button id="download-log" class="ghost small">Скачать полный лог</button>
+      </h2>
+      <pre id="log-view"></pre>
+    </section>
+  </main>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

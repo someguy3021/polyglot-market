@@ -9,21 +9,22 @@
 
 | Что | Команда |
 |---|---|
-| Проверка окружения | `pnpm doctor` *(план фазы 1)* |
-| Установка/настройка | `pnpm setup` *(план)* |
-| Инфраструктура (postgres+minio) | `pnpm infra:up` / `pnpm infra:down` *(план)* |
-| Миграции / сиды | `pnpm db:migrate` / `pnpm db:seed` *(план)* |
-| Запуск/дев (панель :5555) | `pnpm start` *(план)* |
-| Юнит-тесты | `pnpm test` *(план)* |
-| E2E-матрица (фронт × бекенд) | `pnpm test:e2e --front=<имя> --back=<имя>` *(план)* |
-| Линт / типы | `pnpm lint` / `pnpm typecheck` *(план)* |
-| Контракт: линт и клиенты | `pnpm spec:lint` / `pnpm generate:clients` *(план)* |
-| Docker-комбо «1 фронт + 1 бек» | `pnpm docker:up --front=<имя> --back=<имя>` *(план)* |
-| Фабрика экстрактов | `pnpm extract --front=<имя> --back=<имя>` *(план)* |
+| Проверка окружения | `pnpm doctor` |
+| Установка/настройка | `pnpm setup` (install + .env + infra + migrate + seed) |
+| Инфраструктура (postgres+minio/s3rver) | `pnpm infra:up` / `pnpm infra:down` / `pnpm infra:reset` |
+| Миграции / сиды | `pnpm db:migrate` / `pnpm db:seed [--force]` / `pnpm db:reset` |
+| Линт контракта | `pnpm spec:lint` (spectral, 0 ошибок) |
+| Перегенерация клиентов (Java) | `pnpm generate:clients` |
+| Conformance против бекенда | `CONFORMANCE_BASE_URL=http://127.0.0.1:8010 pnpm conformance` (теги: `CONFORMANCE_TAGS=service,auth`) |
+| Laravel-бекенд (:8010 локально) | `cd backend/laravel && php artisan serve --port=8010` |
+| NestJS-бекенд (:3000) | `cd backend/nestjs && pnpm build && node dist/main.js` |
+| Линт / типы (корень) | `pnpm lint` / `pnpm typecheck` |
+| Панель управления (:5555) | `pnpm start` (tsx scripts/panel/manager.ts; проверено, сессия 02) |
+| E2E-матрица (фронт × бекенд) | `pnpm test:e2e` *(фаза 4)* |
 
-Особенности: порты — панель 5555, laravel 8000, nestjs 3000, quasar 9000, vue2 9001, angular 4200, react 3001, nuxt 3002, next 3003, sveltekit 3004, postgres 5432, minio 9002 (console 9003). Секреты — только в локальных `.env` (из `.env.example`); демо-пароль `password` — только для сидов. Один активный бекенд одновременно (ADR-006). Схема БД меняется ТОЛЬКО общими SQL-миграциями `shared/db/migrations` (ADR-002) — artisan-миграции и TypeORM synchronize запрещены. Сгенерированный SDK `packages/api-client` коммитится; перегенерация требует Java (ADR-004). Windows-native не поддерживается — WSL2 (ADR-009).
+Особенности: **порты этой машины** — laravel на 8010 (8000 занят соседним docker-проектом `engineering-family`, см. ADR-009), nestjs 3000, панель 5555 (план), postgres 5432, s3 9002 (console 9003). Инфра живёт в WSL-docker (дистрибутив Ubuntu-24.04); при недоступности образа MinIO — s3rver-fallback на :9002 (ADR-008). Демо-аккаунты всех ролей `*@demo.dev` / пароль `password` (сидами). Схема БД меняется ТОЛЬКО общими SQL-миграциями `shared/db/migrations` (ADR-002); artisan-миграции и TypeORM synchronize запрещены. Сгенерированный SDK `packages/api-client` коммитится; перегенерация требует Java (ADR-004). Секреты — только локальные `.env`; JWT_SECRET общий у обоих бекендов (токены взаимозаменяемы, проверено). Windows-native не поддерживается — WSL2 (ADR-009).
 
-_Проверено: 2026-10-19 (инициализация доки; кода и скриптов ещё нет — таблица фиксирует целевой контракт команд фазы 1)._
+_Проверено: 2026-10-19 (сессия 02 — infra/migrate/seed/serve/conformance прогнаны на этой машине)._
 
 _Таблица — канон: любой тест/скрипт проверки, существующий в репе, обязан быть здесь.
 Нашёл скрипт, которого нет в таблице, — это док-долг: внеси. Пометку «Проверено»

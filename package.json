@@ -19,7 +19,7 @@
     "generate:clients": "node scripts/generate-clients.mjs",
     "spec:lint": "pnpm --dir packages/conformance run lint:spec",
     "conformance": "pnpm --dir packages/conformance test",
-    "start": "node scripts/manager.mjs",
+    "start": "tsx scripts/panel/manager.ts",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
@@ -31,6 +31,7 @@
     "eslint": "^9.0.0",
     "pg": "^8.13.0",
     "s3rver": "^3.7.1",
+    "tsx": "^4.23.15",
     "typescript": "^5.7.0"
   }
 }
