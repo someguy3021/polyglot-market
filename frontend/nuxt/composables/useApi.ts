@@ -9,7 +9,7 @@ export function setOrderIdempotencyKey(key: string | undefined) {
 export function useApi(): ApiClient {
   const config = useRuntimeConfig();
   return createApiClient({
-    baseURL: config.public.apiUrl,
+    baseURL: (import.meta.client && window.API_URL) || config.public.apiUrl,
     getToken: () => (import.meta.client ? localStorage.getItem("pm.token") ?? undefined : undefined),
     getCartToken: () => (import.meta.client ? localStorage.getItem("pm.cart") ?? undefined : undefined),
     getIdempotencyKey: () => idempotencyKey,

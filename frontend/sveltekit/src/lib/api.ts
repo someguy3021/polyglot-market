@@ -1,7 +1,10 @@
 // SDK-клиент SvelteKit: браузерные токены из localStorage (SSR-безопасно — на сервере их нет).
 import { createApiClient } from "@showcase/api-client";
 
-const BASE_URL = (import.meta.env && import.meta.env.VITE_API_URL) || "http://127.0.0.1:8000";
+const BASE_URL =
+  (typeof window !== "undefined" && window.API_URL) ||
+  (import.meta.env && import.meta.env.VITE_API_URL) ||
+  "http://127.0.0.1:8000";
 
 let idempotencyKey: string | undefined;
 export function setOrderIdempotencyKey(key: string | undefined) {

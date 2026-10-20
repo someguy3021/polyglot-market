@@ -1,11 +1,12 @@
-// Мини-статик-сервер для SPA в контейнере (замена nginx, когда registry отдаёт
-// только часть образов). Раздаёт dist + /config.js из env API_URL.
+// Мини-статик-сервер SPA в контейнере: раздаёт dist + /config.js из env API_URL.
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
-import { extname, join, dirname, normalize } from "node:path";
+import { extname, join, normalize } from "node:path";
 
-import { fileURLToPath } from "node:url";
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "dist");
+// dist-поддиректория настраивается под сборку конкретного фронта (angular: dist/<app>/browser)
+const ROOT = process.env.SPA_ROOT
+  ? join("/srv", process.env.SPA_ROOT)
+  : "/srv/dist";
 const PORT = Number(process.env.PORT ?? 80);
 const MIME = {
   ".html": "text/html", ".js": "text/javascript", ".css": "text/css",
@@ -14,6 +15,10 @@ const MIME = {
 };
 
 createServer(async (req, res) => {
+  if (req.url === "/config.js") {
+    res.writeHead(200, { "Content-Type": "text/javascript" });
+    return res.end(`window.API_URL = "${process.env.API_URL ?? "http://localhost:8000"}";`);
+  }
   try {
     const url = (req.url ?? "/").split("?")[0];
     const file = normalize(join(ROOT, url === "/" ? "index.html" : url));
@@ -30,4 +35,4 @@ createServer(async (req, res) => {
       res.writeHead(404).end();
     }
   }
-}).listen(PORT, "0.0.0.0", () => console.log(`spa: :${PORT}`));
+}).listen(PORT, "0.0.0.0", () => console.log(`spa: :${PORT} root=${ROOT}`));

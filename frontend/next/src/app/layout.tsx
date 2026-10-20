@@ -11,6 +11,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ru">
       <body>
+      <script src="/config.js"></script>
         <header className="topbar">
           <Link href="/" className="brand">Polyglot Market</Link>
           <nav>

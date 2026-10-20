@@ -15,7 +15,7 @@ const BACK_PORTS = { laravel: 8000, nestjs: 3000 };
 // какой Dockerfile у каждого фронта и какой порт внутри контейнера
 const FRONT_DOCKER = {
   react: { dockerfile: "frontend/react/Dockerfile", containerPort: 80 },
-  quasar: { dockerfile: "frontend/quasar/Dockerfile", containerPort: 80 },
+  quasar: { dockerfile: "frontend/vue-quasar/Dockerfile", containerPort: 80 },
   vue2: { dockerfile: "frontend/vue2/Dockerfile", containerPort: 80 },
   angular: { dockerfile: "frontend/angular/Dockerfile", containerPort: 80 },
   nuxt: { dockerfile: "frontend/nuxt/Dockerfile", containerPort: 3000 },

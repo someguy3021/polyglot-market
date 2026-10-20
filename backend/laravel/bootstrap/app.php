@@ -18,6 +18,21 @@ require_once __DIR__.'/../vendor/autoload.php';
 | Единый формат ошибок контракта: { status, error, message, details? }.
 | Рендер исключений — единственное место, где он собирается (ADR-004/005).
 */
+if (! function_exists('json_error')) {
+    /** Собирает единый формат ошибки из контракта (shared/api-spec/openapi.yaml → Error). */
+    function json_error(int $status, string $error, string $message, array $details = []): JsonResponse
+    {
+        $body = ['status' => $status, 'error' => $error, 'message' => $message];
+        if ($details !== []) {
+            $body['details'] = collect($details)
+                ->map(fn ($messages) => array_values((array) $messages))
+                ->all();
+        }
+
+        return response()->json($body, $status);
+    }
+}
+
 $app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         api: __DIR__.'/../routes/api.php',
@@ -64,29 +79,16 @@ $app = Application::configure(basePath: dirname(__DIR__))
                 422 => 'unprocessable',
             ];
             $status = $e->getStatusCode();
+
             return json_error($status, $map[$status] ?? 'internal', $e->getMessage() ?: 'Error.');
         });
         $exceptions->render(function (Throwable $e, Request $request) {
             if (config('app.debug')) {
                 return null; // отдаём отладку дефолтному рендеру Laravel (APP_DEBUG=true)
             }
+
             return json_error(500, 'internal', 'Internal server error.');
         });
     })->create();
 
 return $app;
-
-/** Собирает единый формат ошибки из контракта (shared/api-spec/openapi.yaml → Error). */
-if (! function_exists('json_error')) {
-    function json_error(int $status, string $error, string $message, array $details = []): JsonResponse
-    {
-        $body = ['status' => $status, 'error' => $error, 'message' => $message];
-        if ($details !== []) {
-            $body['details'] = collect($details)
-                ->map(fn ($messages) => array_values((array) $messages))
-                ->all();
-        }
-
-        return response()->json($body, $status);
-    }
-}

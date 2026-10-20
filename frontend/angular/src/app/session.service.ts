@@ -17,7 +17,7 @@ let idempotencyKey: string | undefined;
 @Injectable({ providedIn: "root" })
 export class SessionService {
   readonly api = createApiClient({
-    baseURL: "http://127.0.0.1:8000",
+    baseURL: (typeof window !== "undefined" && window.API_URL) || "http://127.0.0.1:8000",
     getToken: () => localStorage.getItem("pm.token") ?? undefined,
     getCartToken: () => localStorage.getItem("pm.cart") ?? undefined,
     getIdempotencyKey: () => idempotencyKey,

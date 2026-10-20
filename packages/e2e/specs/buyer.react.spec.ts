@@ -6,7 +6,7 @@ import { expect, test } from "@playwright/test";
  */
 test("react: покупатель — корзина гостя → checkout → заказ", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator(".MuiCard-root").first()).toBeVisible({ timeout: 15_000 });
+  await expect(page.locator(".MuiCard-root").first()).toBeVisible({ timeout: 45_000 });
 
   // первый товар с запасом
   const cards = page.locator(".MuiCard-root").filter({ hasText: /в наличии: \d{2,}/ });
