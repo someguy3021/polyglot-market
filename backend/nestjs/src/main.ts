@@ -22,7 +22,7 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new ContractExceptionFilter());
   const port = Number(process.env.PORT ?? 3000);
-  await app.listen(port, "127.0.0.1");
+  await app.listen(port, "0.0.0.0");
   console.log(`nestjs: контракт на http://127.0.0.1:${port}`);
 }
 

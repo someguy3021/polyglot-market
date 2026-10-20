@@ -1,0 +1,30 @@
+
+services:
+  nestjs:
+    build:
+      context: ..
+      dockerfile: backend/nestjs/Dockerfile
+    environment:
+      DB_HOST: host.docker.internal
+      DB_PORT: "5432"
+      DB_DATABASE: polyglot
+      DB_USERNAME: polyglot
+      DB_PASSWORD: secret
+      JWT_SECRET: dev-only-secret-change-me-0123456789-abcdef-secret-change-me
+      PORT: "3000"
+      S3_ENDPOINT: http://host.docker.internal:9002
+      S3_BUCKET: products
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "3000:3000"
+  react:
+    build:
+      context: ..
+      dockerfile: frontend/react/Dockerfile
+    environment:
+      API_URL: http://localhost:3000
+    ports:
+      - "3001:80"

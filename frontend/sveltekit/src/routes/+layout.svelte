@@ -8,7 +8,10 @@
   const links: Array<{ href: string; label: string; show: boolean }> = [
     { href: '/', label: 'Каталог', show: true },
     { href: '/cart', label: 'Корзина', show: true },
-    { href: '/orders', label: 'Заказы', show: Boolean(session.user) }
+    { href: '/orders', label: 'Заказы', show: Boolean(session.user) },
+    { href: '/seller/products', label: 'Мои товары', show: session.user?.role === 'seller' },
+    { href: '/moderator/queue', label: 'Модерация', show: session.user?.role === 'moderator' || session.user?.role === 'admin' },
+    { href: '/admin/orders', label: 'Админ', show: session.user?.role === 'admin' }
   ];
 </script>
 

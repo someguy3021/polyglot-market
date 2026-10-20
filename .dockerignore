@@ -1,0 +1,19 @@
+# Корневой .dockerignore: контекст = корень репо (ADR-007), в образы идёт только нужное
+**/node_modules
+**/dist
+**/.next
+**/.nuxt
+**/.output
+**/.svelte-kit
+**/.quasar
+**/vendor
+**/.git
+**/.infra
+**/docs
+**/test-results
+**/playwright-report
+**/database.sqlite
+**/*.log
+backend/laravel/.env
+backend/laravel/storage
+backend/laravel/bootstrap/cache

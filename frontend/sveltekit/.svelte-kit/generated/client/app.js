@@ -17,19 +17,25 @@ export const nodes = [
 	() => import('./nodes/5'),
 	() => import('./nodes/6'),
 	() => import('./nodes/7'),
-	() => import('./nodes/8')
+	() => import('./nodes/8'),
+	() => import('./nodes/9'),
+	() => import('./nodes/10'),
+	() => import('./nodes/11')
 ];
 
 export const server_loads = [];
 
 export const dictionary = {
 		"/": [2],
-		"/cart": [3],
-		"/checkout": [4],
-		"/login": [5],
-		"/orders": [6],
-		"/product/[id]": [7],
-		"/register": [8]
+		"/admin/orders": [3],
+		"/cart": [4],
+		"/checkout": [5],
+		"/login": [6],
+		"/moderator/queue": [7],
+		"/orders": [8],
+		"/product/[id]": [9],
+		"/register": [10],
+		"/seller/products": [11]
 	};
 
 export const hooks = {

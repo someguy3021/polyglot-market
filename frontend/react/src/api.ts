@@ -2,7 +2,10 @@
 // одноразовый Idempotency-Key для POST /orders (ADR-011).
 import { createApiClient, type ApiClient } from "@showcase/api-client";
 
-const BASE_URL: string = (import.meta.env?.VITE_API_URL as string) ?? "http://127.0.0.1:8000";
+const BASE_URL: string =
+  (window as { API_URL?: string }).API_URL ??
+  (import.meta.env?.VITE_API_URL as string) ??
+  "http://127.0.0.1:8000";
 
 let idempotencyKey: string | undefined;
 export function setOrderIdempotencyKey(key: string | undefined) {

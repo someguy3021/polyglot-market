@@ -1,4 +1,3 @@
-"use strict";
 /* tslint:disable */
 /* eslint-disable */
 /**
@@ -12,24 +11,19 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ServiceApi = exports.ServiceApiFactory = exports.ServiceApiFp = exports.ServiceApiAxiosParamCreator = exports.SellerApi = exports.SellerApiFactory = exports.SellerApiFp = exports.SellerApiAxiosParamCreator = exports.OrdersApi = exports.OrdersApiFactory = exports.OrdersApiFp = exports.OrdersApiAxiosParamCreator = exports.ModerationApi = exports.ModerationApiFactory = exports.ModerationApiFp = exports.ModerationApiAxiosParamCreator = exports.ListProductsSortEnum = exports.CatalogApi = exports.CatalogApiFactory = exports.CatalogApiFp = exports.CatalogApiAxiosParamCreator = exports.CartApi = exports.CartApiFactory = exports.CartApiFp = exports.CartApiAxiosParamCreator = exports.AuthApi = exports.AuthApiFactory = exports.AuthApiFp = exports.AuthApiAxiosParamCreator = exports.AdminApi = exports.AdminApiFactory = exports.AdminApiFp = exports.AdminApiAxiosParamCreator = exports.UserRole = exports.PromoCodeInputTypeEnum = exports.PromoCodeTypeEnum = exports.ProductStatusEnum = exports.OrderStatus = exports.ModelErrorErrorEnum = exports.InlineObjectErrorEnum = exports.GetHealth200ResponseStatusEnum = void 0;
-const axios_1 = __importDefault(require("axios"));
+import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-const common_1 = require("./common");
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBearerAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from './common';
 // @ts-ignore
-const base_1 = require("./base");
-exports.GetHealth200ResponseStatusEnum = {
+import { BASE_PATH, BaseAPI, operationServerMap } from './base';
+export const GetHealth200ResponseStatusEnum = {
     ok: 'ok'
 };
-exports.InlineObjectErrorEnum = {
+export const InlineObjectErrorEnum = {
     validation_error: 'validation_error'
 };
-exports.ModelErrorErrorEnum = {
+export const ModelErrorErrorEnum = {
     validation_error: 'validation_error',
     unauthorized: 'unauthorized',
     forbidden: 'forbidden',
@@ -43,24 +37,24 @@ exports.ModelErrorErrorEnum = {
  * @export
  * @enum {string}
  */
-exports.OrderStatus = {
+export const OrderStatus = {
     new: 'new',
     paid: 'paid',
     shipped: 'shipped',
     done: 'done',
     cancelled: 'cancelled'
 };
-exports.ProductStatusEnum = {
+export const ProductStatusEnum = {
     draft: 'draft',
     pending_moderation: 'pending_moderation',
     approved: 'approved',
     rejected: 'rejected'
 };
-exports.PromoCodeTypeEnum = {
+export const PromoCodeTypeEnum = {
     percent: 'percent',
     fixed: 'fixed'
 };
-exports.PromoCodeInputTypeEnum = {
+export const PromoCodeInputTypeEnum = {
     percent: 'percent',
     fixed: 'fixed'
 };
@@ -69,7 +63,7 @@ exports.PromoCodeInputTypeEnum = {
  * @export
  * @enum {string}
  */
-exports.UserRole = {
+export const UserRole = {
     buyer: 'buyer',
     seller: 'seller',
     moderator: 'moderator',
@@ -79,7 +73,7 @@ exports.UserRole = {
  * AdminApi - axios parameter creator
  * @export
  */
-const AdminApiAxiosParamCreator = function (configuration) {
+export const AdminApiAxiosParamCreator = function (configuration) {
     return {
         /**
          *
@@ -90,10 +84,10 @@ const AdminApiAxiosParamCreator = function (configuration) {
          */
         createPromoCode: async (promoCodeInput, options = {}) => {
             // verify required parameter 'promoCodeInput' is not null or undefined
-            (0, common_1.assertParamExists)('createPromoCode', 'promoCodeInput', promoCodeInput);
+            assertParamExists('createPromoCode', 'promoCodeInput', promoCodeInput);
             const localVarPath = `/admin/promo-codes`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -103,14 +97,14 @@ const AdminApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
-            localVarRequestOptions.data = (0, common_1.serializeDataIfNeeded)(promoCodeInput, localVarRequestOptions, configuration);
+            localVarRequestOptions.data = serializeDataIfNeeded(promoCodeInput, localVarRequestOptions, configuration);
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -123,11 +117,11 @@ const AdminApiAxiosParamCreator = function (configuration) {
          */
         deleteProduct: async (id, options = {}) => {
             // verify required parameter 'id' is not null or undefined
-            (0, common_1.assertParamExists)('deleteProduct', 'id', id);
+            assertParamExists('deleteProduct', 'id', id);
             const localVarPath = `/admin/products/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -137,12 +131,12 @@ const AdminApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -158,7 +152,7 @@ const AdminApiAxiosParamCreator = function (configuration) {
         listAllOrders: async (page, perPage, status, options = {}) => {
             const localVarPath = `/admin/orders`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -168,7 +162,7 @@ const AdminApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
             if (page !== undefined) {
                 localVarQueryParameter['page'] = page;
             }
@@ -178,11 +172,11 @@ const AdminApiAxiosParamCreator = function (configuration) {
             if (status !== undefined) {
                 localVarQueryParameter['status'] = status;
             }
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -195,7 +189,7 @@ const AdminApiAxiosParamCreator = function (configuration) {
         listPromoCodes: async (options = {}) => {
             const localVarPath = `/admin/promo-codes`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -205,12 +199,12 @@ const AdminApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -226,7 +220,7 @@ const AdminApiAxiosParamCreator = function (configuration) {
         listUsers: async (page, perPage, role, options = {}) => {
             const localVarPath = `/admin/users`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -236,7 +230,7 @@ const AdminApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
             if (page !== undefined) {
                 localVarQueryParameter['page'] = page;
             }
@@ -246,11 +240,11 @@ const AdminApiAxiosParamCreator = function (configuration) {
             if (role !== undefined) {
                 localVarQueryParameter['role'] = role;
             }
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -264,13 +258,13 @@ const AdminApiAxiosParamCreator = function (configuration) {
          */
         updateOrderStatus: async (id, updateOrderStatusRequest, options = {}) => {
             // verify required parameter 'id' is not null or undefined
-            (0, common_1.assertParamExists)('updateOrderStatus', 'id', id);
+            assertParamExists('updateOrderStatus', 'id', id);
             // verify required parameter 'updateOrderStatusRequest' is not null or undefined
-            (0, common_1.assertParamExists)('updateOrderStatus', 'updateOrderStatusRequest', updateOrderStatusRequest);
+            assertParamExists('updateOrderStatus', 'updateOrderStatusRequest', updateOrderStatusRequest);
             const localVarPath = `/admin/orders/{id}/status`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -280,14 +274,14 @@ const AdminApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
-            localVarRequestOptions.data = (0, common_1.serializeDataIfNeeded)(updateOrderStatusRequest, localVarRequestOptions, configuration);
+            localVarRequestOptions.data = serializeDataIfNeeded(updateOrderStatusRequest, localVarRequestOptions, configuration);
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -301,13 +295,13 @@ const AdminApiAxiosParamCreator = function (configuration) {
          */
         updateUserRole: async (id, updateUserRoleRequest, options = {}) => {
             // verify required parameter 'id' is not null or undefined
-            (0, common_1.assertParamExists)('updateUserRole', 'id', id);
+            assertParamExists('updateUserRole', 'id', id);
             // verify required parameter 'updateUserRoleRequest' is not null or undefined
-            (0, common_1.assertParamExists)('updateUserRole', 'updateUserRoleRequest', updateUserRoleRequest);
+            assertParamExists('updateUserRole', 'updateUserRoleRequest', updateUserRoleRequest);
             const localVarPath = `/admin/users/{id}/role`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -317,26 +311,25 @@ const AdminApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
-            localVarRequestOptions.data = (0, common_1.serializeDataIfNeeded)(updateUserRoleRequest, localVarRequestOptions, configuration);
+            localVarRequestOptions.data = serializeDataIfNeeded(updateUserRoleRequest, localVarRequestOptions, configuration);
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
     };
 };
-exports.AdminApiAxiosParamCreator = AdminApiAxiosParamCreator;
 /**
  * AdminApi - functional programming interface
  * @export
  */
-const AdminApiFp = function (configuration) {
-    const localVarAxiosParamCreator = (0, exports.AdminApiAxiosParamCreator)(configuration);
+export const AdminApiFp = function (configuration) {
+    const localVarAxiosParamCreator = AdminApiAxiosParamCreator(configuration);
     return {
         /**
          *
@@ -348,8 +341,8 @@ const AdminApiFp = function (configuration) {
         async createPromoCode(promoCodeInput, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.createPromoCode(promoCodeInput, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['AdminApi.createPromoCode']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.createPromoCode']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -361,8 +354,8 @@ const AdminApiFp = function (configuration) {
         async deleteProduct(id, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteProduct(id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['AdminApi.deleteProduct']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.deleteProduct']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -376,8 +369,8 @@ const AdminApiFp = function (configuration) {
         async listAllOrders(page, perPage, status, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.listAllOrders(page, perPage, status, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['AdminApi.listAllOrders']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.listAllOrders']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -388,8 +381,8 @@ const AdminApiFp = function (configuration) {
         async listPromoCodes(options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.listPromoCodes(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['AdminApi.listPromoCodes']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.listPromoCodes']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -403,8 +396,8 @@ const AdminApiFp = function (configuration) {
         async listUsers(page, perPage, role, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.listUsers(page, perPage, role, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['AdminApi.listUsers']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.listUsers']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * Допустимые переходы: new→paid|cancelled, paid→shipped|cancelled, shipped→done, done/cancelled — терминальные.
@@ -417,8 +410,8 @@ const AdminApiFp = function (configuration) {
         async updateOrderStatus(id, updateOrderStatusRequest, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.updateOrderStatus(id, updateOrderStatusRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['AdminApi.updateOrderStatus']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.updateOrderStatus']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -431,18 +424,17 @@ const AdminApiFp = function (configuration) {
         async updateUserRole(id, updateUserRoleRequest, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.updateUserRole(id, updateUserRoleRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['AdminApi.updateUserRole']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.updateUserRole']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     };
 };
-exports.AdminApiFp = AdminApiFp;
 /**
  * AdminApi - factory interface
  * @export
  */
-const AdminApiFactory = function (configuration, basePath, axios) {
-    const localVarFp = (0, exports.AdminApiFp)(configuration);
+export const AdminApiFactory = function (configuration, basePath, axios) {
+    const localVarFp = AdminApiFp(configuration);
     return {
         /**
          *
@@ -521,14 +513,13 @@ const AdminApiFactory = function (configuration, basePath, axios) {
         },
     };
 };
-exports.AdminApiFactory = AdminApiFactory;
 /**
  * AdminApi - object-oriented interface
  * @export
  * @class AdminApi
  * @extends {BaseAPI}
  */
-class AdminApi extends base_1.BaseAPI {
+export class AdminApi extends BaseAPI {
     /**
      *
      * @summary Создать промокод
@@ -538,7 +529,7 @@ class AdminApi extends base_1.BaseAPI {
      * @memberof AdminApi
      */
     createPromoCode(promoCodeInput, options) {
-        return (0, exports.AdminApiFp)(this.configuration).createPromoCode(promoCodeInput, options).then((request) => request(this.axios, this.basePath));
+        return AdminApiFp(this.configuration).createPromoCode(promoCodeInput, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -549,7 +540,7 @@ class AdminApi extends base_1.BaseAPI {
      * @memberof AdminApi
      */
     deleteProduct(id, options) {
-        return (0, exports.AdminApiFp)(this.configuration).deleteProduct(id, options).then((request) => request(this.axios, this.basePath));
+        return AdminApiFp(this.configuration).deleteProduct(id, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -562,7 +553,7 @@ class AdminApi extends base_1.BaseAPI {
      * @memberof AdminApi
      */
     listAllOrders(page, perPage, status, options) {
-        return (0, exports.AdminApiFp)(this.configuration).listAllOrders(page, perPage, status, options).then((request) => request(this.axios, this.basePath));
+        return AdminApiFp(this.configuration).listAllOrders(page, perPage, status, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -572,7 +563,7 @@ class AdminApi extends base_1.BaseAPI {
      * @memberof AdminApi
      */
     listPromoCodes(options) {
-        return (0, exports.AdminApiFp)(this.configuration).listPromoCodes(options).then((request) => request(this.axios, this.basePath));
+        return AdminApiFp(this.configuration).listPromoCodes(options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -585,7 +576,7 @@ class AdminApi extends base_1.BaseAPI {
      * @memberof AdminApi
      */
     listUsers(page, perPage, role, options) {
-        return (0, exports.AdminApiFp)(this.configuration).listUsers(page, perPage, role, options).then((request) => request(this.axios, this.basePath));
+        return AdminApiFp(this.configuration).listUsers(page, perPage, role, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      * Допустимые переходы: new→paid|cancelled, paid→shipped|cancelled, shipped→done, done/cancelled — терминальные.
@@ -597,7 +588,7 @@ class AdminApi extends base_1.BaseAPI {
      * @memberof AdminApi
      */
     updateOrderStatus(id, updateOrderStatusRequest, options) {
-        return (0, exports.AdminApiFp)(this.configuration).updateOrderStatus(id, updateOrderStatusRequest, options).then((request) => request(this.axios, this.basePath));
+        return AdminApiFp(this.configuration).updateOrderStatus(id, updateOrderStatusRequest, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -609,15 +600,14 @@ class AdminApi extends base_1.BaseAPI {
      * @memberof AdminApi
      */
     updateUserRole(id, updateUserRoleRequest, options) {
-        return (0, exports.AdminApiFp)(this.configuration).updateUserRole(id, updateUserRoleRequest, options).then((request) => request(this.axios, this.basePath));
+        return AdminApiFp(this.configuration).updateUserRole(id, updateUserRoleRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
-exports.AdminApi = AdminApi;
 /**
  * AuthApi - axios parameter creator
  * @export
  */
-const AuthApiAxiosParamCreator = function (configuration) {
+export const AuthApiAxiosParamCreator = function (configuration) {
     return {
         /**
          *
@@ -628,7 +618,7 @@ const AuthApiAxiosParamCreator = function (configuration) {
         getMe: async (options = {}) => {
             const localVarPath = `/auth/me`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -638,12 +628,12 @@ const AuthApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -656,10 +646,10 @@ const AuthApiAxiosParamCreator = function (configuration) {
          */
         login: async (loginInput, options = {}) => {
             // verify required parameter 'loginInput' is not null or undefined
-            (0, common_1.assertParamExists)('login', 'loginInput', loginInput);
+            assertParamExists('login', 'loginInput', loginInput);
             const localVarPath = `/auth/login`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -668,12 +658,12 @@ const AuthApiAxiosParamCreator = function (configuration) {
             const localVarHeaderParameter = {};
             const localVarQueryParameter = {};
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
-            localVarRequestOptions.data = (0, common_1.serializeDataIfNeeded)(loginInput, localVarRequestOptions, configuration);
+            localVarRequestOptions.data = serializeDataIfNeeded(loginInput, localVarRequestOptions, configuration);
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -686,10 +676,10 @@ const AuthApiAxiosParamCreator = function (configuration) {
          */
         register: async (registerInput, options = {}) => {
             // verify required parameter 'registerInput' is not null or undefined
-            (0, common_1.assertParamExists)('register', 'registerInput', registerInput);
+            assertParamExists('register', 'registerInput', registerInput);
             const localVarPath = `/auth/register`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -698,24 +688,23 @@ const AuthApiAxiosParamCreator = function (configuration) {
             const localVarHeaderParameter = {};
             const localVarQueryParameter = {};
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
-            localVarRequestOptions.data = (0, common_1.serializeDataIfNeeded)(registerInput, localVarRequestOptions, configuration);
+            localVarRequestOptions.data = serializeDataIfNeeded(registerInput, localVarRequestOptions, configuration);
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
     };
 };
-exports.AuthApiAxiosParamCreator = AuthApiAxiosParamCreator;
 /**
  * AuthApi - functional programming interface
  * @export
  */
-const AuthApiFp = function (configuration) {
-    const localVarAxiosParamCreator = (0, exports.AuthApiAxiosParamCreator)(configuration);
+export const AuthApiFp = function (configuration) {
+    const localVarAxiosParamCreator = AuthApiAxiosParamCreator(configuration);
     return {
         /**
          *
@@ -726,8 +715,8 @@ const AuthApiFp = function (configuration) {
         async getMe(options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getMe(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['AuthApi.getMe']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['AuthApi.getMe']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -739,8 +728,8 @@ const AuthApiFp = function (configuration) {
         async login(loginInput, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.login(loginInput, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['AuthApi.login']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['AuthApi.login']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * Создаёт пользователя с ролью `buyer`. Продавцов/модераторов назначает админ.
@@ -752,18 +741,17 @@ const AuthApiFp = function (configuration) {
         async register(registerInput, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.register(registerInput, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['AuthApi.register']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['AuthApi.register']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     };
 };
-exports.AuthApiFp = AuthApiFp;
 /**
  * AuthApi - factory interface
  * @export
  */
-const AuthApiFactory = function (configuration, basePath, axios) {
-    const localVarFp = (0, exports.AuthApiFp)(configuration);
+export const AuthApiFactory = function (configuration, basePath, axios) {
+    const localVarFp = AuthApiFp(configuration);
     return {
         /**
          *
@@ -796,14 +784,13 @@ const AuthApiFactory = function (configuration, basePath, axios) {
         },
     };
 };
-exports.AuthApiFactory = AuthApiFactory;
 /**
  * AuthApi - object-oriented interface
  * @export
  * @class AuthApi
  * @extends {BaseAPI}
  */
-class AuthApi extends base_1.BaseAPI {
+export class AuthApi extends BaseAPI {
     /**
      *
      * @summary Текущий пользователь
@@ -812,7 +799,7 @@ class AuthApi extends base_1.BaseAPI {
      * @memberof AuthApi
      */
     getMe(options) {
-        return (0, exports.AuthApiFp)(this.configuration).getMe(options).then((request) => request(this.axios, this.basePath));
+        return AuthApiFp(this.configuration).getMe(options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -823,7 +810,7 @@ class AuthApi extends base_1.BaseAPI {
      * @memberof AuthApi
      */
     login(loginInput, options) {
-        return (0, exports.AuthApiFp)(this.configuration).login(loginInput, options).then((request) => request(this.axios, this.basePath));
+        return AuthApiFp(this.configuration).login(loginInput, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      * Создаёт пользователя с ролью `buyer`. Продавцов/модераторов назначает админ.
@@ -834,15 +821,14 @@ class AuthApi extends base_1.BaseAPI {
      * @memberof AuthApi
      */
     register(registerInput, options) {
-        return (0, exports.AuthApiFp)(this.configuration).register(registerInput, options).then((request) => request(this.axios, this.basePath));
+        return AuthApiFp(this.configuration).register(registerInput, options).then((request) => request(this.axios, this.basePath));
     }
 }
-exports.AuthApi = AuthApi;
 /**
  * CartApi - axios parameter creator
  * @export
  */
-const CartApiAxiosParamCreator = function (configuration) {
+export const CartApiAxiosParamCreator = function (configuration) {
     return {
         /**
          * Гостю в ответе заголовок `X-Cart-Token` — сохранить и слать далее.
@@ -854,10 +840,10 @@ const CartApiAxiosParamCreator = function (configuration) {
          */
         addCartItem: async (cartItemInput, xCartToken, options = {}) => {
             // verify required parameter 'cartItemInput' is not null or undefined
-            (0, common_1.assertParamExists)('addCartItem', 'cartItemInput', cartItemInput);
+            assertParamExists('addCartItem', 'cartItemInput', cartItemInput);
             const localVarPath = `/cart/items`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -866,20 +852,20 @@ const CartApiAxiosParamCreator = function (configuration) {
             const localVarHeaderParameter = {};
             const localVarQueryParameter = {};
             // authentication cartToken required
-            await (0, common_1.setApiKeyToObject)(localVarHeaderParameter, "X-Cart-Token", configuration);
+            await setApiKeyToObject(localVarHeaderParameter, "X-Cart-Token", configuration);
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
             localVarHeaderParameter['Content-Type'] = 'application/json';
             if (xCartToken != null) {
                 localVarHeaderParameter['X-Cart-Token'] = String(xCartToken);
             }
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
-            localVarRequestOptions.data = (0, common_1.serializeDataIfNeeded)(cartItemInput, localVarRequestOptions, configuration);
+            localVarRequestOptions.data = serializeDataIfNeeded(cartItemInput, localVarRequestOptions, configuration);
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -893,11 +879,11 @@ const CartApiAxiosParamCreator = function (configuration) {
          */
         deleteCartItem: async (id, xCartToken, options = {}) => {
             // verify required parameter 'id' is not null or undefined
-            (0, common_1.assertParamExists)('deleteCartItem', 'id', id);
+            assertParamExists('deleteCartItem', 'id', id);
             const localVarPath = `/cart/items/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -906,18 +892,18 @@ const CartApiAxiosParamCreator = function (configuration) {
             const localVarHeaderParameter = {};
             const localVarQueryParameter = {};
             // authentication cartToken required
-            await (0, common_1.setApiKeyToObject)(localVarHeaderParameter, "X-Cart-Token", configuration);
+            await setApiKeyToObject(localVarHeaderParameter, "X-Cart-Token", configuration);
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
             if (xCartToken != null) {
                 localVarHeaderParameter['X-Cart-Token'] = String(xCartToken);
             }
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -930,7 +916,7 @@ const CartApiAxiosParamCreator = function (configuration) {
         getCart: async (options = {}) => {
             const localVarPath = `/cart`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -939,15 +925,15 @@ const CartApiAxiosParamCreator = function (configuration) {
             const localVarHeaderParameter = {};
             const localVarQueryParameter = {};
             // authentication cartToken required
-            await (0, common_1.setApiKeyToObject)(localVarHeaderParameter, "X-Cart-Token", configuration);
+            await setApiKeyToObject(localVarHeaderParameter, "X-Cart-Token", configuration);
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -960,10 +946,10 @@ const CartApiAxiosParamCreator = function (configuration) {
          */
         mergeCart: async (mergeCartRequest, options = {}) => {
             // verify required parameter 'mergeCartRequest' is not null or undefined
-            (0, common_1.assertParamExists)('mergeCart', 'mergeCartRequest', mergeCartRequest);
+            assertParamExists('mergeCart', 'mergeCartRequest', mergeCartRequest);
             const localVarPath = `/cart/merge`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -973,14 +959,14 @@ const CartApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
-            localVarRequestOptions.data = (0, common_1.serializeDataIfNeeded)(mergeCartRequest, localVarRequestOptions, configuration);
+            localVarRequestOptions.data = serializeDataIfNeeded(mergeCartRequest, localVarRequestOptions, configuration);
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -995,13 +981,13 @@ const CartApiAxiosParamCreator = function (configuration) {
          */
         updateCartItem: async (id, updateCartItemRequest, xCartToken, options = {}) => {
             // verify required parameter 'id' is not null or undefined
-            (0, common_1.assertParamExists)('updateCartItem', 'id', id);
+            assertParamExists('updateCartItem', 'id', id);
             // verify required parameter 'updateCartItemRequest' is not null or undefined
-            (0, common_1.assertParamExists)('updateCartItem', 'updateCartItemRequest', updateCartItemRequest);
+            assertParamExists('updateCartItem', 'updateCartItemRequest', updateCartItemRequest);
             const localVarPath = `/cart/items/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1010,32 +996,31 @@ const CartApiAxiosParamCreator = function (configuration) {
             const localVarHeaderParameter = {};
             const localVarQueryParameter = {};
             // authentication cartToken required
-            await (0, common_1.setApiKeyToObject)(localVarHeaderParameter, "X-Cart-Token", configuration);
+            await setApiKeyToObject(localVarHeaderParameter, "X-Cart-Token", configuration);
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
             localVarHeaderParameter['Content-Type'] = 'application/json';
             if (xCartToken != null) {
                 localVarHeaderParameter['X-Cart-Token'] = String(xCartToken);
             }
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
-            localVarRequestOptions.data = (0, common_1.serializeDataIfNeeded)(updateCartItemRequest, localVarRequestOptions, configuration);
+            localVarRequestOptions.data = serializeDataIfNeeded(updateCartItemRequest, localVarRequestOptions, configuration);
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
     };
 };
-exports.CartApiAxiosParamCreator = CartApiAxiosParamCreator;
 /**
  * CartApi - functional programming interface
  * @export
  */
-const CartApiFp = function (configuration) {
-    const localVarAxiosParamCreator = (0, exports.CartApiAxiosParamCreator)(configuration);
+export const CartApiFp = function (configuration) {
+    const localVarAxiosParamCreator = CartApiAxiosParamCreator(configuration);
     return {
         /**
          * Гостю в ответе заголовок `X-Cart-Token` — сохранить и слать далее.
@@ -1048,8 +1033,8 @@ const CartApiFp = function (configuration) {
         async addCartItem(cartItemInput, xCartToken, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.addCartItem(cartItemInput, xCartToken, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['CartApi.addCartItem']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['CartApi.addCartItem']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -1062,8 +1047,8 @@ const CartApiFp = function (configuration) {
         async deleteCartItem(id, xCartToken, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteCartItem(id, xCartToken, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['CartApi.deleteCartItem']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['CartApi.deleteCartItem']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * Для авторизованного — аккаунтная корзина. Для гостя — по заголовку `X-Cart-Token` (UUID из ответа `POST /cart/items` при первом добавлении, хранится на клиенте).
@@ -1074,8 +1059,8 @@ const CartApiFp = function (configuration) {
         async getCart(options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getCart(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['CartApi.getCart']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['CartApi.getCart']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * Вызывается после логина/регистрации с тем `X-Cart-Token`, под которым гость собирал корзину. Позиции сливаются по товару (количества суммируются до 99), гостевая корзина помечается merged.
@@ -1087,8 +1072,8 @@ const CartApiFp = function (configuration) {
         async mergeCart(mergeCartRequest, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.mergeCart(mergeCartRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['CartApi.mergeCart']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['CartApi.mergeCart']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -1102,18 +1087,17 @@ const CartApiFp = function (configuration) {
         async updateCartItem(id, updateCartItemRequest, xCartToken, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.updateCartItem(id, updateCartItemRequest, xCartToken, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['CartApi.updateCartItem']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['CartApi.updateCartItem']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     };
 };
-exports.CartApiFp = CartApiFp;
 /**
  * CartApi - factory interface
  * @export
  */
-const CartApiFactory = function (configuration, basePath, axios) {
-    const localVarFp = (0, exports.CartApiFp)(configuration);
+export const CartApiFactory = function (configuration, basePath, axios) {
+    const localVarFp = CartApiFp(configuration);
     return {
         /**
          * Гостю в ответе заголовок `X-Cart-Token` — сохранить и слать далее.
@@ -1170,14 +1154,13 @@ const CartApiFactory = function (configuration, basePath, axios) {
         },
     };
 };
-exports.CartApiFactory = CartApiFactory;
 /**
  * CartApi - object-oriented interface
  * @export
  * @class CartApi
  * @extends {BaseAPI}
  */
-class CartApi extends base_1.BaseAPI {
+export class CartApi extends BaseAPI {
     /**
      * Гостю в ответе заголовок `X-Cart-Token` — сохранить и слать далее.
      * @summary Добавить товар в корзину
@@ -1188,7 +1171,7 @@ class CartApi extends base_1.BaseAPI {
      * @memberof CartApi
      */
     addCartItem(cartItemInput, xCartToken, options) {
-        return (0, exports.CartApiFp)(this.configuration).addCartItem(cartItemInput, xCartToken, options).then((request) => request(this.axios, this.basePath));
+        return CartApiFp(this.configuration).addCartItem(cartItemInput, xCartToken, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -1200,7 +1183,7 @@ class CartApi extends base_1.BaseAPI {
      * @memberof CartApi
      */
     deleteCartItem(id, xCartToken, options) {
-        return (0, exports.CartApiFp)(this.configuration).deleteCartItem(id, xCartToken, options).then((request) => request(this.axios, this.basePath));
+        return CartApiFp(this.configuration).deleteCartItem(id, xCartToken, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      * Для авторизованного — аккаунтная корзина. Для гостя — по заголовку `X-Cart-Token` (UUID из ответа `POST /cart/items` при первом добавлении, хранится на клиенте).
@@ -1210,7 +1193,7 @@ class CartApi extends base_1.BaseAPI {
      * @memberof CartApi
      */
     getCart(options) {
-        return (0, exports.CartApiFp)(this.configuration).getCart(options).then((request) => request(this.axios, this.basePath));
+        return CartApiFp(this.configuration).getCart(options).then((request) => request(this.axios, this.basePath));
     }
     /**
      * Вызывается после логина/регистрации с тем `X-Cart-Token`, под которым гость собирал корзину. Позиции сливаются по товару (количества суммируются до 99), гостевая корзина помечается merged.
@@ -1221,7 +1204,7 @@ class CartApi extends base_1.BaseAPI {
      * @memberof CartApi
      */
     mergeCart(mergeCartRequest, options) {
-        return (0, exports.CartApiFp)(this.configuration).mergeCart(mergeCartRequest, options).then((request) => request(this.axios, this.basePath));
+        return CartApiFp(this.configuration).mergeCart(mergeCartRequest, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -1234,15 +1217,14 @@ class CartApi extends base_1.BaseAPI {
      * @memberof CartApi
      */
     updateCartItem(id, updateCartItemRequest, xCartToken, options) {
-        return (0, exports.CartApiFp)(this.configuration).updateCartItem(id, updateCartItemRequest, xCartToken, options).then((request) => request(this.axios, this.basePath));
+        return CartApiFp(this.configuration).updateCartItem(id, updateCartItemRequest, xCartToken, options).then((request) => request(this.axios, this.basePath));
     }
 }
-exports.CartApi = CartApi;
 /**
  * CatalogApi - axios parameter creator
  * @export
  */
-const CatalogApiAxiosParamCreator = function (configuration) {
+export const CatalogApiAxiosParamCreator = function (configuration) {
     return {
         /**
          *
@@ -1253,11 +1235,11 @@ const CatalogApiAxiosParamCreator = function (configuration) {
          */
         getProduct: async (id, options = {}) => {
             // verify required parameter 'id' is not null or undefined
-            (0, common_1.assertParamExists)('getProduct', 'id', id);
+            assertParamExists('getProduct', 'id', id);
             const localVarPath = `/products/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1265,11 +1247,11 @@ const CatalogApiAxiosParamCreator = function (configuration) {
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
             const localVarHeaderParameter = {};
             const localVarQueryParameter = {};
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -1282,7 +1264,7 @@ const CatalogApiAxiosParamCreator = function (configuration) {
         listCategories: async (options = {}) => {
             const localVarPath = `/categories`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1290,11 +1272,11 @@ const CatalogApiAxiosParamCreator = function (configuration) {
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
             const localVarHeaderParameter = {};
             const localVarQueryParameter = {};
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -1315,7 +1297,7 @@ const CatalogApiAxiosParamCreator = function (configuration) {
         listProducts: async (page, perPage, category, seller, q, priceMin, priceMax, sort, options = {}) => {
             const localVarPath = `/products`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1347,23 +1329,22 @@ const CatalogApiAxiosParamCreator = function (configuration) {
             if (sort !== undefined) {
                 localVarQueryParameter['sort'] = sort;
             }
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
     };
 };
-exports.CatalogApiAxiosParamCreator = CatalogApiAxiosParamCreator;
 /**
  * CatalogApi - functional programming interface
  * @export
  */
-const CatalogApiFp = function (configuration) {
-    const localVarAxiosParamCreator = (0, exports.CatalogApiAxiosParamCreator)(configuration);
+export const CatalogApiFp = function (configuration) {
+    const localVarAxiosParamCreator = CatalogApiAxiosParamCreator(configuration);
     return {
         /**
          *
@@ -1375,8 +1356,8 @@ const CatalogApiFp = function (configuration) {
         async getProduct(id, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getProduct(id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['CatalogApi.getProduct']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['CatalogApi.getProduct']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -1387,8 +1368,8 @@ const CatalogApiFp = function (configuration) {
         async listCategories(options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.listCategories(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['CatalogApi.listCategories']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['CatalogApi.listCategories']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -1407,18 +1388,17 @@ const CatalogApiFp = function (configuration) {
         async listProducts(page, perPage, category, seller, q, priceMin, priceMax, sort, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.listProducts(page, perPage, category, seller, q, priceMin, priceMax, sort, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['CatalogApi.listProducts']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['CatalogApi.listProducts']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     };
 };
-exports.CatalogApiFp = CatalogApiFp;
 /**
  * CatalogApi - factory interface
  * @export
  */
-const CatalogApiFactory = function (configuration, basePath, axios) {
-    const localVarFp = (0, exports.CatalogApiFp)(configuration);
+export const CatalogApiFactory = function (configuration, basePath, axios) {
+    const localVarFp = CatalogApiFp(configuration);
     return {
         /**
          *
@@ -1458,14 +1438,13 @@ const CatalogApiFactory = function (configuration, basePath, axios) {
         },
     };
 };
-exports.CatalogApiFactory = CatalogApiFactory;
 /**
  * CatalogApi - object-oriented interface
  * @export
  * @class CatalogApi
  * @extends {BaseAPI}
  */
-class CatalogApi extends base_1.BaseAPI {
+export class CatalogApi extends BaseAPI {
     /**
      *
      * @summary Карточка товара
@@ -1475,7 +1454,7 @@ class CatalogApi extends base_1.BaseAPI {
      * @memberof CatalogApi
      */
     getProduct(id, options) {
-        return (0, exports.CatalogApiFp)(this.configuration).getProduct(id, options).then((request) => request(this.axios, this.basePath));
+        return CatalogApiFp(this.configuration).getProduct(id, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -1485,7 +1464,7 @@ class CatalogApi extends base_1.BaseAPI {
      * @memberof CatalogApi
      */
     listCategories(options) {
-        return (0, exports.CatalogApiFp)(this.configuration).listCategories(options).then((request) => request(this.axios, this.basePath));
+        return CatalogApiFp(this.configuration).listCategories(options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -1503,14 +1482,13 @@ class CatalogApi extends base_1.BaseAPI {
      * @memberof CatalogApi
      */
     listProducts(page, perPage, category, seller, q, priceMin, priceMax, sort, options) {
-        return (0, exports.CatalogApiFp)(this.configuration).listProducts(page, perPage, category, seller, q, priceMin, priceMax, sort, options).then((request) => request(this.axios, this.basePath));
+        return CatalogApiFp(this.configuration).listProducts(page, perPage, category, seller, q, priceMin, priceMax, sort, options).then((request) => request(this.axios, this.basePath));
     }
 }
-exports.CatalogApi = CatalogApi;
 /**
  * @export
  */
-exports.ListProductsSortEnum = {
+export const ListProductsSortEnum = {
     newest: 'newest',
     oldest: 'oldest',
     price_asc: 'price_asc',
@@ -1520,7 +1498,7 @@ exports.ListProductsSortEnum = {
  * ModerationApi - axios parameter creator
  * @export
  */
-const ModerationApiAxiosParamCreator = function (configuration) {
+export const ModerationApiAxiosParamCreator = function (configuration) {
     return {
         /**
          *
@@ -1531,11 +1509,11 @@ const ModerationApiAxiosParamCreator = function (configuration) {
          */
         approveProduct: async (id, options = {}) => {
             // verify required parameter 'id' is not null or undefined
-            (0, common_1.assertParamExists)('approveProduct', 'id', id);
+            assertParamExists('approveProduct', 'id', id);
             const localVarPath = `/moderator/products/{id}/approve`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1545,12 +1523,12 @@ const ModerationApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -1565,7 +1543,7 @@ const ModerationApiAxiosParamCreator = function (configuration) {
         moderationQueue: async (page, perPage, options = {}) => {
             const localVarPath = `/moderator/queue`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1575,18 +1553,18 @@ const ModerationApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
             if (page !== undefined) {
                 localVarQueryParameter['page'] = page;
             }
             if (perPage !== undefined) {
                 localVarQueryParameter['perPage'] = perPage;
             }
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -1600,13 +1578,13 @@ const ModerationApiAxiosParamCreator = function (configuration) {
          */
         rejectProduct: async (id, rejectProductRequest, options = {}) => {
             // verify required parameter 'id' is not null or undefined
-            (0, common_1.assertParamExists)('rejectProduct', 'id', id);
+            assertParamExists('rejectProduct', 'id', id);
             // verify required parameter 'rejectProductRequest' is not null or undefined
-            (0, common_1.assertParamExists)('rejectProduct', 'rejectProductRequest', rejectProductRequest);
+            assertParamExists('rejectProduct', 'rejectProductRequest', rejectProductRequest);
             const localVarPath = `/moderator/products/{id}/reject`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1616,26 +1594,25 @@ const ModerationApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
-            localVarRequestOptions.data = (0, common_1.serializeDataIfNeeded)(rejectProductRequest, localVarRequestOptions, configuration);
+            localVarRequestOptions.data = serializeDataIfNeeded(rejectProductRequest, localVarRequestOptions, configuration);
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
     };
 };
-exports.ModerationApiAxiosParamCreator = ModerationApiAxiosParamCreator;
 /**
  * ModerationApi - functional programming interface
  * @export
  */
-const ModerationApiFp = function (configuration) {
-    const localVarAxiosParamCreator = (0, exports.ModerationApiAxiosParamCreator)(configuration);
+export const ModerationApiFp = function (configuration) {
+    const localVarAxiosParamCreator = ModerationApiAxiosParamCreator(configuration);
     return {
         /**
          *
@@ -1647,8 +1624,8 @@ const ModerationApiFp = function (configuration) {
         async approveProduct(id, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.approveProduct(id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['ModerationApi.approveProduct']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['ModerationApi.approveProduct']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -1661,8 +1638,8 @@ const ModerationApiFp = function (configuration) {
         async moderationQueue(page, perPage, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.moderationQueue(page, perPage, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['ModerationApi.moderationQueue']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['ModerationApi.moderationQueue']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -1675,18 +1652,17 @@ const ModerationApiFp = function (configuration) {
         async rejectProduct(id, rejectProductRequest, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.rejectProduct(id, rejectProductRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['ModerationApi.rejectProduct']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['ModerationApi.rejectProduct']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     };
 };
-exports.ModerationApiFp = ModerationApiFp;
 /**
  * ModerationApi - factory interface
  * @export
  */
-const ModerationApiFactory = function (configuration, basePath, axios) {
-    const localVarFp = (0, exports.ModerationApiFp)(configuration);
+export const ModerationApiFactory = function (configuration, basePath, axios) {
+    const localVarFp = ModerationApiFp(configuration);
     return {
         /**
          *
@@ -1722,14 +1698,13 @@ const ModerationApiFactory = function (configuration, basePath, axios) {
         },
     };
 };
-exports.ModerationApiFactory = ModerationApiFactory;
 /**
  * ModerationApi - object-oriented interface
  * @export
  * @class ModerationApi
  * @extends {BaseAPI}
  */
-class ModerationApi extends base_1.BaseAPI {
+export class ModerationApi extends BaseAPI {
     /**
      *
      * @summary Одобрить товар
@@ -1739,7 +1714,7 @@ class ModerationApi extends base_1.BaseAPI {
      * @memberof ModerationApi
      */
     approveProduct(id, options) {
-        return (0, exports.ModerationApiFp)(this.configuration).approveProduct(id, options).then((request) => request(this.axios, this.basePath));
+        return ModerationApiFp(this.configuration).approveProduct(id, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -1751,7 +1726,7 @@ class ModerationApi extends base_1.BaseAPI {
      * @memberof ModerationApi
      */
     moderationQueue(page, perPage, options) {
-        return (0, exports.ModerationApiFp)(this.configuration).moderationQueue(page, perPage, options).then((request) => request(this.axios, this.basePath));
+        return ModerationApiFp(this.configuration).moderationQueue(page, perPage, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -1763,15 +1738,14 @@ class ModerationApi extends base_1.BaseAPI {
      * @memberof ModerationApi
      */
     rejectProduct(id, rejectProductRequest, options) {
-        return (0, exports.ModerationApiFp)(this.configuration).rejectProduct(id, rejectProductRequest, options).then((request) => request(this.axios, this.basePath));
+        return ModerationApiFp(this.configuration).rejectProduct(id, rejectProductRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
-exports.ModerationApi = ModerationApi;
 /**
  * OrdersApi - axios parameter creator
  * @export
  */
-const OrdersApiAxiosParamCreator = function (configuration) {
+export const OrdersApiAxiosParamCreator = function (configuration) {
     return {
         /**
          * Требует `Idempotency-Key` (UUID). Повтор того же ключа тем же пользователем возвращает исходный заказ (200, не 201). Корзина конвертируется, склад уменьшается транзакционно.
@@ -1783,12 +1757,12 @@ const OrdersApiAxiosParamCreator = function (configuration) {
          */
         createOrder: async (idempotencyKey, orderInput, options = {}) => {
             // verify required parameter 'idempotencyKey' is not null or undefined
-            (0, common_1.assertParamExists)('createOrder', 'idempotencyKey', idempotencyKey);
+            assertParamExists('createOrder', 'idempotencyKey', idempotencyKey);
             // verify required parameter 'orderInput' is not null or undefined
-            (0, common_1.assertParamExists)('createOrder', 'orderInput', orderInput);
+            assertParamExists('createOrder', 'orderInput', orderInput);
             const localVarPath = `/orders`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1798,17 +1772,17 @@ const OrdersApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
             localVarHeaderParameter['Content-Type'] = 'application/json';
             if (idempotencyKey != null) {
                 localVarHeaderParameter['Idempotency-Key'] = String(idempotencyKey);
             }
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
-            localVarRequestOptions.data = (0, common_1.serializeDataIfNeeded)(orderInput, localVarRequestOptions, configuration);
+            localVarRequestOptions.data = serializeDataIfNeeded(orderInput, localVarRequestOptions, configuration);
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -1821,11 +1795,11 @@ const OrdersApiAxiosParamCreator = function (configuration) {
          */
         getOrder: async (id, options = {}) => {
             // verify required parameter 'id' is not null or undefined
-            (0, common_1.assertParamExists)('getOrder', 'id', id);
+            assertParamExists('getOrder', 'id', id);
             const localVarPath = `/orders/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1835,12 +1809,12 @@ const OrdersApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -1855,7 +1829,7 @@ const OrdersApiAxiosParamCreator = function (configuration) {
         listMyOrders: async (page, perPage, options = {}) => {
             const localVarPath = `/orders`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1865,18 +1839,18 @@ const OrdersApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
             if (page !== undefined) {
                 localVarQueryParameter['page'] = page;
             }
             if (perPage !== undefined) {
                 localVarQueryParameter['perPage'] = perPage;
             }
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -1889,7 +1863,7 @@ const OrdersApiAxiosParamCreator = function (configuration) {
         listShippingMethods: async (options = {}) => {
             const localVarPath = `/shipping-methods`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1897,11 +1871,11 @@ const OrdersApiAxiosParamCreator = function (configuration) {
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
             const localVarHeaderParameter = {};
             const localVarQueryParameter = {};
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -1914,10 +1888,10 @@ const OrdersApiAxiosParamCreator = function (configuration) {
          */
         validatePromo: async (validatePromoRequest, options = {}) => {
             // verify required parameter 'validatePromoRequest' is not null or undefined
-            (0, common_1.assertParamExists)('validatePromo', 'validatePromoRequest', validatePromoRequest);
+            assertParamExists('validatePromo', 'validatePromoRequest', validatePromoRequest);
             const localVarPath = `/promo/validate`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -1926,24 +1900,23 @@ const OrdersApiAxiosParamCreator = function (configuration) {
             const localVarHeaderParameter = {};
             const localVarQueryParameter = {};
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
-            localVarRequestOptions.data = (0, common_1.serializeDataIfNeeded)(validatePromoRequest, localVarRequestOptions, configuration);
+            localVarRequestOptions.data = serializeDataIfNeeded(validatePromoRequest, localVarRequestOptions, configuration);
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
     };
 };
-exports.OrdersApiAxiosParamCreator = OrdersApiAxiosParamCreator;
 /**
  * OrdersApi - functional programming interface
  * @export
  */
-const OrdersApiFp = function (configuration) {
-    const localVarAxiosParamCreator = (0, exports.OrdersApiAxiosParamCreator)(configuration);
+export const OrdersApiFp = function (configuration) {
+    const localVarAxiosParamCreator = OrdersApiAxiosParamCreator(configuration);
     return {
         /**
          * Требует `Idempotency-Key` (UUID). Повтор того же ключа тем же пользователем возвращает исходный заказ (200, не 201). Корзина конвертируется, склад уменьшается транзакционно.
@@ -1956,8 +1929,8 @@ const OrdersApiFp = function (configuration) {
         async createOrder(idempotencyKey, orderInput, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.createOrder(idempotencyKey, orderInput, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['OrdersApi.createOrder']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['OrdersApi.createOrder']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * Доступно владельцу, модератору и админу.
@@ -1969,8 +1942,8 @@ const OrdersApiFp = function (configuration) {
         async getOrder(id, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getOrder(id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['OrdersApi.getOrder']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['OrdersApi.getOrder']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -1983,8 +1956,8 @@ const OrdersApiFp = function (configuration) {
         async listMyOrders(page, perPage, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.listMyOrders(page, perPage, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['OrdersApi.listMyOrders']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['OrdersApi.listMyOrders']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -1995,8 +1968,8 @@ const OrdersApiFp = function (configuration) {
         async listShippingMethods(options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.listShippingMethods(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['OrdersApi.listShippingMethods']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['OrdersApi.listShippingMethods']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -2008,18 +1981,17 @@ const OrdersApiFp = function (configuration) {
         async validatePromo(validatePromoRequest, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.validatePromo(validatePromoRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['OrdersApi.validatePromo']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['OrdersApi.validatePromo']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     };
 };
-exports.OrdersApiFp = OrdersApiFp;
 /**
  * OrdersApi - factory interface
  * @export
  */
-const OrdersApiFactory = function (configuration, basePath, axios) {
-    const localVarFp = (0, exports.OrdersApiFp)(configuration);
+export const OrdersApiFactory = function (configuration, basePath, axios) {
+    const localVarFp = OrdersApiFp(configuration);
     return {
         /**
          * Требует `Idempotency-Key` (UUID). Повтор того же ключа тем же пользователем возвращает исходный заказ (200, не 201). Корзина конвертируется, склад уменьшается транзакционно.
@@ -2074,14 +2046,13 @@ const OrdersApiFactory = function (configuration, basePath, axios) {
         },
     };
 };
-exports.OrdersApiFactory = OrdersApiFactory;
 /**
  * OrdersApi - object-oriented interface
  * @export
  * @class OrdersApi
  * @extends {BaseAPI}
  */
-class OrdersApi extends base_1.BaseAPI {
+export class OrdersApi extends BaseAPI {
     /**
      * Требует `Idempotency-Key` (UUID). Повтор того же ключа тем же пользователем возвращает исходный заказ (200, не 201). Корзина конвертируется, склад уменьшается транзакционно.
      * @summary Оформить заказ из корзины
@@ -2092,7 +2063,7 @@ class OrdersApi extends base_1.BaseAPI {
      * @memberof OrdersApi
      */
     createOrder(idempotencyKey, orderInput, options) {
-        return (0, exports.OrdersApiFp)(this.configuration).createOrder(idempotencyKey, orderInput, options).then((request) => request(this.axios, this.basePath));
+        return OrdersApiFp(this.configuration).createOrder(idempotencyKey, orderInput, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      * Доступно владельцу, модератору и админу.
@@ -2103,7 +2074,7 @@ class OrdersApi extends base_1.BaseAPI {
      * @memberof OrdersApi
      */
     getOrder(id, options) {
-        return (0, exports.OrdersApiFp)(this.configuration).getOrder(id, options).then((request) => request(this.axios, this.basePath));
+        return OrdersApiFp(this.configuration).getOrder(id, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -2115,7 +2086,7 @@ class OrdersApi extends base_1.BaseAPI {
      * @memberof OrdersApi
      */
     listMyOrders(page, perPage, options) {
-        return (0, exports.OrdersApiFp)(this.configuration).listMyOrders(page, perPage, options).then((request) => request(this.axios, this.basePath));
+        return OrdersApiFp(this.configuration).listMyOrders(page, perPage, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -2125,7 +2096,7 @@ class OrdersApi extends base_1.BaseAPI {
      * @memberof OrdersApi
      */
     listShippingMethods(options) {
-        return (0, exports.OrdersApiFp)(this.configuration).listShippingMethods(options).then((request) => request(this.axios, this.basePath));
+        return OrdersApiFp(this.configuration).listShippingMethods(options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -2136,15 +2107,14 @@ class OrdersApi extends base_1.BaseAPI {
      * @memberof OrdersApi
      */
     validatePromo(validatePromoRequest, options) {
-        return (0, exports.OrdersApiFp)(this.configuration).validatePromo(validatePromoRequest, options).then((request) => request(this.axios, this.basePath));
+        return OrdersApiFp(this.configuration).validatePromo(validatePromoRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
-exports.OrdersApi = OrdersApi;
 /**
  * SellerApi - axios parameter creator
  * @export
  */
-const SellerApiAxiosParamCreator = function (configuration) {
+export const SellerApiAxiosParamCreator = function (configuration) {
     return {
         /**
          *
@@ -2155,10 +2125,10 @@ const SellerApiAxiosParamCreator = function (configuration) {
          */
         createSellerProduct: async (productInput, options = {}) => {
             // verify required parameter 'productInput' is not null or undefined
-            (0, common_1.assertParamExists)('createSellerProduct', 'productInput', productInput);
+            assertParamExists('createSellerProduct', 'productInput', productInput);
             const localVarPath = `/seller/products`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2168,14 +2138,14 @@ const SellerApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
-            localVarRequestOptions.data = (0, common_1.serializeDataIfNeeded)(productInput, localVarRequestOptions, configuration);
+            localVarRequestOptions.data = serializeDataIfNeeded(productInput, localVarRequestOptions, configuration);
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -2189,14 +2159,14 @@ const SellerApiAxiosParamCreator = function (configuration) {
          */
         deleteProductImage: async (id, imageId, options = {}) => {
             // verify required parameter 'id' is not null or undefined
-            (0, common_1.assertParamExists)('deleteProductImage', 'id', id);
+            assertParamExists('deleteProductImage', 'id', id);
             // verify required parameter 'imageId' is not null or undefined
-            (0, common_1.assertParamExists)('deleteProductImage', 'imageId', imageId);
+            assertParamExists('deleteProductImage', 'imageId', imageId);
             const localVarPath = `/seller/products/{id}/images/{imageId}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)))
                 .replace(`{${"imageId"}}`, encodeURIComponent(String(imageId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2206,12 +2176,12 @@ const SellerApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -2226,7 +2196,7 @@ const SellerApiAxiosParamCreator = function (configuration) {
         listSellerOrderItems: async (page, perPage, options = {}) => {
             const localVarPath = `/seller/order-items`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2236,18 +2206,18 @@ const SellerApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
             if (page !== undefined) {
                 localVarQueryParameter['page'] = page;
             }
             if (perPage !== undefined) {
                 localVarQueryParameter['perPage'] = perPage;
             }
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -2262,7 +2232,7 @@ const SellerApiAxiosParamCreator = function (configuration) {
         listSellerProducts: async (page, perPage, options = {}) => {
             const localVarPath = `/seller/products`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2272,18 +2242,18 @@ const SellerApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
             if (page !== undefined) {
                 localVarQueryParameter['page'] = page;
             }
             if (perPage !== undefined) {
                 localVarQueryParameter['perPage'] = perPage;
             }
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -2296,11 +2266,11 @@ const SellerApiAxiosParamCreator = function (configuration) {
          */
         submitSellerProduct: async (id, options = {}) => {
             // verify required parameter 'id' is not null or undefined
-            (0, common_1.assertParamExists)('submitSellerProduct', 'id', id);
+            assertParamExists('submitSellerProduct', 'id', id);
             const localVarPath = `/seller/products/{id}/submit`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2310,12 +2280,12 @@ const SellerApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -2329,13 +2299,13 @@ const SellerApiAxiosParamCreator = function (configuration) {
          */
         updateSellerProduct: async (id, productInput, options = {}) => {
             // verify required parameter 'id' is not null or undefined
-            (0, common_1.assertParamExists)('updateSellerProduct', 'id', id);
+            assertParamExists('updateSellerProduct', 'id', id);
             // verify required parameter 'productInput' is not null or undefined
-            (0, common_1.assertParamExists)('updateSellerProduct', 'productInput', productInput);
+            assertParamExists('updateSellerProduct', 'productInput', productInput);
             const localVarPath = `/seller/products/{id}`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2345,14 +2315,14 @@ const SellerApiAxiosParamCreator = function (configuration) {
             const localVarQueryParameter = {};
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
             localVarHeaderParameter['Content-Type'] = 'application/json';
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
-            localVarRequestOptions.data = (0, common_1.serializeDataIfNeeded)(productInput, localVarRequestOptions, configuration);
+            localVarRequestOptions.data = serializeDataIfNeeded(productInput, localVarRequestOptions, configuration);
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
@@ -2366,13 +2336,13 @@ const SellerApiAxiosParamCreator = function (configuration) {
          */
         uploadProductImage: async (id, file, options = {}) => {
             // verify required parameter 'id' is not null or undefined
-            (0, common_1.assertParamExists)('uploadProductImage', 'id', id);
+            assertParamExists('uploadProductImage', 'id', id);
             // verify required parameter 'file' is not null or undefined
-            (0, common_1.assertParamExists)('uploadProductImage', 'file', file);
+            assertParamExists('uploadProductImage', 'file', file);
             const localVarPath = `/seller/products/{id}/images`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2383,29 +2353,28 @@ const SellerApiAxiosParamCreator = function (configuration) {
             const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
             // authentication bearerAuth required
             // http bearer authentication required
-            await (0, common_1.setBearerAuthToObject)(localVarHeaderParameter, configuration);
+            await setBearerAuthToObject(localVarHeaderParameter, configuration);
             if (file !== undefined) {
                 localVarFormParams.append('file', file);
             }
             localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             localVarRequestOptions.data = localVarFormParams;
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
     };
 };
-exports.SellerApiAxiosParamCreator = SellerApiAxiosParamCreator;
 /**
  * SellerApi - functional programming interface
  * @export
  */
-const SellerApiFp = function (configuration) {
-    const localVarAxiosParamCreator = (0, exports.SellerApiAxiosParamCreator)(configuration);
+export const SellerApiFp = function (configuration) {
+    const localVarAxiosParamCreator = SellerApiAxiosParamCreator(configuration);
     return {
         /**
          *
@@ -2417,8 +2386,8 @@ const SellerApiFp = function (configuration) {
         async createSellerProduct(productInput, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.createSellerProduct(productInput, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['SellerApi.createSellerProduct']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['SellerApi.createSellerProduct']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -2431,8 +2400,8 @@ const SellerApiFp = function (configuration) {
         async deleteProductImage(id, imageId, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteProductImage(id, imageId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['SellerApi.deleteProductImage']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['SellerApi.deleteProductImage']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -2445,8 +2414,8 @@ const SellerApiFp = function (configuration) {
         async listSellerOrderItems(page, perPage, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.listSellerOrderItems(page, perPage, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['SellerApi.listSellerOrderItems']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['SellerApi.listSellerOrderItems']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -2459,8 +2428,8 @@ const SellerApiFp = function (configuration) {
         async listSellerProducts(page, perPage, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.listSellerProducts(page, perPage, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['SellerApi.listSellerProducts']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['SellerApi.listSellerProducts']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          *
@@ -2472,8 +2441,8 @@ const SellerApiFp = function (configuration) {
         async submitSellerProduct(id, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.submitSellerProduct(id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['SellerApi.submitSellerProduct']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['SellerApi.submitSellerProduct']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * Одобренный товар при правке возвращается в draft и требует повторной модерации.
@@ -2486,8 +2455,8 @@ const SellerApiFp = function (configuration) {
         async updateSellerProduct(id, productInput, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.updateSellerProduct(id, productInput, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['SellerApi.updateSellerProduct']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['SellerApi.updateSellerProduct']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
          * multipart/form-data, поле `file`; jpeg/png/webp до 5 МБ. Первое изображение становится primary.
@@ -2500,18 +2469,17 @@ const SellerApiFp = function (configuration) {
         async uploadProductImage(id, file, options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.uploadProductImage(id, file, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['SellerApi.uploadProductImage']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['SellerApi.uploadProductImage']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     };
 };
-exports.SellerApiFp = SellerApiFp;
 /**
  * SellerApi - factory interface
  * @export
  */
-const SellerApiFactory = function (configuration, basePath, axios) {
-    const localVarFp = (0, exports.SellerApiFp)(configuration);
+export const SellerApiFactory = function (configuration, basePath, axios) {
+    const localVarFp = SellerApiFp(configuration);
     return {
         /**
          *
@@ -2590,14 +2558,13 @@ const SellerApiFactory = function (configuration, basePath, axios) {
         },
     };
 };
-exports.SellerApiFactory = SellerApiFactory;
 /**
  * SellerApi - object-oriented interface
  * @export
  * @class SellerApi
  * @extends {BaseAPI}
  */
-class SellerApi extends base_1.BaseAPI {
+export class SellerApi extends BaseAPI {
     /**
      *
      * @summary Создать товар (черновик)
@@ -2607,7 +2574,7 @@ class SellerApi extends base_1.BaseAPI {
      * @memberof SellerApi
      */
     createSellerProduct(productInput, options) {
-        return (0, exports.SellerApiFp)(this.configuration).createSellerProduct(productInput, options).then((request) => request(this.axios, this.basePath));
+        return SellerApiFp(this.configuration).createSellerProduct(productInput, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -2619,7 +2586,7 @@ class SellerApi extends base_1.BaseAPI {
      * @memberof SellerApi
      */
     deleteProductImage(id, imageId, options) {
-        return (0, exports.SellerApiFp)(this.configuration).deleteProductImage(id, imageId, options).then((request) => request(this.axios, this.basePath));
+        return SellerApiFp(this.configuration).deleteProductImage(id, imageId, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -2631,7 +2598,7 @@ class SellerApi extends base_1.BaseAPI {
      * @memberof SellerApi
      */
     listSellerOrderItems(page, perPage, options) {
-        return (0, exports.SellerApiFp)(this.configuration).listSellerOrderItems(page, perPage, options).then((request) => request(this.axios, this.basePath));
+        return SellerApiFp(this.configuration).listSellerOrderItems(page, perPage, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -2643,7 +2610,7 @@ class SellerApi extends base_1.BaseAPI {
      * @memberof SellerApi
      */
     listSellerProducts(page, perPage, options) {
-        return (0, exports.SellerApiFp)(this.configuration).listSellerProducts(page, perPage, options).then((request) => request(this.axios, this.basePath));
+        return SellerApiFp(this.configuration).listSellerProducts(page, perPage, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      *
@@ -2654,7 +2621,7 @@ class SellerApi extends base_1.BaseAPI {
      * @memberof SellerApi
      */
     submitSellerProduct(id, options) {
-        return (0, exports.SellerApiFp)(this.configuration).submitSellerProduct(id, options).then((request) => request(this.axios, this.basePath));
+        return SellerApiFp(this.configuration).submitSellerProduct(id, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      * Одобренный товар при правке возвращается в draft и требует повторной модерации.
@@ -2666,7 +2633,7 @@ class SellerApi extends base_1.BaseAPI {
      * @memberof SellerApi
      */
     updateSellerProduct(id, productInput, options) {
-        return (0, exports.SellerApiFp)(this.configuration).updateSellerProduct(id, productInput, options).then((request) => request(this.axios, this.basePath));
+        return SellerApiFp(this.configuration).updateSellerProduct(id, productInput, options).then((request) => request(this.axios, this.basePath));
     }
     /**
      * multipart/form-data, поле `file`; jpeg/png/webp до 5 МБ. Первое изображение становится primary.
@@ -2678,15 +2645,14 @@ class SellerApi extends base_1.BaseAPI {
      * @memberof SellerApi
      */
     uploadProductImage(id, file, options) {
-        return (0, exports.SellerApiFp)(this.configuration).uploadProductImage(id, file, options).then((request) => request(this.axios, this.basePath));
+        return SellerApiFp(this.configuration).uploadProductImage(id, file, options).then((request) => request(this.axios, this.basePath));
     }
 }
-exports.SellerApi = SellerApi;
 /**
  * ServiceApi - axios parameter creator
  * @export
  */
-const ServiceApiAxiosParamCreator = function (configuration) {
+export const ServiceApiAxiosParamCreator = function (configuration) {
     return {
         /**
          *
@@ -2697,7 +2663,7 @@ const ServiceApiAxiosParamCreator = function (configuration) {
         getHealth: async (options = {}) => {
             const localVarPath = `/health`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, common_1.DUMMY_BASE_URL);
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
             if (configuration) {
                 baseOptions = configuration.baseOptions;
@@ -2705,23 +2671,22 @@ const ServiceApiAxiosParamCreator = function (configuration) {
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
             const localVarHeaderParameter = {};
             const localVarQueryParameter = {};
-            (0, common_1.setSearchParams)(localVarUrlObj, localVarQueryParameter);
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers };
             return {
-                url: (0, common_1.toPathString)(localVarUrlObj),
+                url: toPathString(localVarUrlObj),
                 options: localVarRequestOptions,
             };
         },
     };
 };
-exports.ServiceApiAxiosParamCreator = ServiceApiAxiosParamCreator;
 /**
  * ServiceApi - functional programming interface
  * @export
  */
-const ServiceApiFp = function (configuration) {
-    const localVarAxiosParamCreator = (0, exports.ServiceApiAxiosParamCreator)(configuration);
+export const ServiceApiFp = function (configuration) {
+    const localVarAxiosParamCreator = ServiceApiAxiosParamCreator(configuration);
     return {
         /**
          *
@@ -2732,18 +2697,17 @@ const ServiceApiFp = function (configuration) {
         async getHealth(options) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getHealth(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = base_1.operationServerMap['ServiceApi.getHealth']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => (0, common_1.createRequestFunction)(localVarAxiosArgs, axios_1.default, base_1.BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+            const localVarOperationServerBasePath = operationServerMap['ServiceApi.getHealth']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     };
 };
-exports.ServiceApiFp = ServiceApiFp;
 /**
  * ServiceApi - factory interface
  * @export
  */
-const ServiceApiFactory = function (configuration, basePath, axios) {
-    const localVarFp = (0, exports.ServiceApiFp)(configuration);
+export const ServiceApiFactory = function (configuration, basePath, axios) {
+    const localVarFp = ServiceApiFp(configuration);
     return {
         /**
          *
@@ -2756,14 +2720,13 @@ const ServiceApiFactory = function (configuration, basePath, axios) {
         },
     };
 };
-exports.ServiceApiFactory = ServiceApiFactory;
 /**
  * ServiceApi - object-oriented interface
  * @export
  * @class ServiceApi
  * @extends {BaseAPI}
  */
-class ServiceApi extends base_1.BaseAPI {
+export class ServiceApi extends BaseAPI {
     /**
      *
      * @summary Живость сервиса
@@ -2772,7 +2735,6 @@ class ServiceApi extends base_1.BaseAPI {
      * @memberof ServiceApi
      */
     getHealth(options) {
-        return (0, exports.ServiceApiFp)(this.configuration).getHealth(options).then((request) => request(this.axios, this.basePath));
+        return ServiceApiFp(this.configuration).getHealth(options).then((request) => request(this.axios, this.basePath));
     }
 }
-exports.ServiceApi = ServiceApi;

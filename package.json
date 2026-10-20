@@ -23,7 +23,9 @@
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "extract": "node scripts/extract-stack.mjs",
-    "serve-backend": "node scripts/serve-backend.mjs"
+    "serve-backend": "node scripts/serve-backend.mjs",
+    "docker:up": "node scripts/combo.mjs",
+    "docker:down": "node scripts/combo-down.mjs"
   },
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.700.0",

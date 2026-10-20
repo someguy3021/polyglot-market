@@ -1,4 +1,3 @@
-"use strict";
 /* tslint:disable */
 /* eslint-disable */
 /**
@@ -12,9 +11,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Configuration = void 0;
-class Configuration {
+export class Configuration {
     /**
      * parameter for apiKey security
      * @param name security name
@@ -101,4 +98,3 @@ class Configuration {
         return mime !== null && (jsonMime.test(mime) || mime.toLowerCase() === 'application/json-patch+json');
     }
 }
-exports.Configuration = Configuration;

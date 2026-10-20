@@ -2,10 +2,13 @@
 	"/": [
 		"src/routes/+page.ts"
 	],
+	"/admin/orders": [],
 	"/cart": [],
 	"/checkout": [],
 	"/login": [],
+	"/moderator/queue": [],
 	"/orders": [],
 	"/product/[id]": [],
-	"/register": []
+	"/register": [],
+	"/seller/products": []
 }

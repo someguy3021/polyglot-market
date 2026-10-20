@@ -6,6 +6,11 @@
         <NuxtLink to="/">Каталог</NuxtLink>
         <NuxtLink to="/cart">Корзина<b v-if="count" class="badge">{{ count }}</b></NuxtLink>
         <template v-if="user">
+          <NuxtLink v-if="user.role === 'seller'" to="/seller/products">Мои товары</NuxtLink>
+          <NuxtLink v-if="['moderator', 'admin'].includes(user.role)" to="/moderator/queue">Модерация</NuxtLink>
+          <NuxtLink v-if="user.role === 'admin'" to="/admin/orders">Админ</NuxtLink>
+        </template>
+        <template v-if="user">
           <NuxtLink to="/orders">Заказы</NuxtLink>
           <a href="#" @click.prevent="doLogout">Выйти</a>
         </template>

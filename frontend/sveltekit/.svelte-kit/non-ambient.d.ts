@@ -29,21 +29,27 @@ declare module "$app/types" {
 	type MatcherParam<M> = M extends (param : string) => param is (infer U extends string) ? U : string;
 
 	export interface AppTypes {
-		RouteId(): "/" | "/cart" | "/checkout" | "/login" | "/orders" | "/product" | "/product/[id]" | "/register";
+		RouteId(): "/" | "/admin" | "/admin/orders" | "/cart" | "/checkout" | "/login" | "/moderator" | "/moderator/queue" | "/orders" | "/product" | "/product/[id]" | "/register" | "/seller" | "/seller/products";
 		RouteParams(): {
 			"/product/[id]": { id: string }
 		};
 		LayoutParams(): {
 			"/": { id?: string | undefined };
+			"/admin": Record<string, never>;
+			"/admin/orders": Record<string, never>;
 			"/cart": Record<string, never>;
 			"/checkout": Record<string, never>;
 			"/login": Record<string, never>;
+			"/moderator": Record<string, never>;
+			"/moderator/queue": Record<string, never>;
 			"/orders": Record<string, never>;
 			"/product": { id?: string | undefined };
 			"/product/[id]": { id: string };
-			"/register": Record<string, never>
+			"/register": Record<string, never>;
+			"/seller": Record<string, never>;
+			"/seller/products": Record<string, never>
 		};
-		Pathname(): "/" | "/cart" | "/checkout" | "/login" | "/orders" | `/product/${string}` & {} | "/register";
+		Pathname(): "/" | "/admin/orders" | "/cart" | "/checkout" | "/login" | "/moderator/queue" | "/orders" | `/product/${string}` & {} | "/register" | "/seller/products";
 		ResolvedPathname(): `${"" | `/${string}`}${ReturnType<AppTypes['Pathname']>}`;
 		Asset(): string & {};
 	}

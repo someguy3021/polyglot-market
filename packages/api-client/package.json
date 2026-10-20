@@ -4,11 +4,12 @@
   "private": true,
   "description": "Единый TypeScript SDK всех фронтендов Polyglot Market. Сгенерирован из shared/api-spec/openapi.yaml (ADR-004).",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "types": "src/index.ts",
   "scripts": {
     "build": "tsc"
   },
   "dependencies": {
     "axios": "^1.7.0"
-  }
+  },
+  "type": "module"
 }
