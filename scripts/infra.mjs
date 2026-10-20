@@ -7,7 +7,7 @@ import { spawn, execSync } from "node:child_process";
 import { createConnection } from "node:net";
 import { mkdirSync, existsSync, readFileSync, writeFileSync, unlinkSync, openSync } from "node:fs";
 import { join } from "node:path";
-import { dockerRunner, dockerRun, toWslPath, keepWslAlive } from "./lib/docker.mjs";
+import { dockerRunner, dockerRun, toWslPath, keepWslAlive, stopWslAlive } from "./lib/docker.mjs";
 import { tryCmd } from "./lib/exec.mjs";
 
 const ROOT = join(import.meta.dirname, "..");
@@ -31,12 +31,14 @@ if (cmd === "up") {
 } else if (cmd === "down") {
   stopS3Dev();
   for (const port of FORWARDED_PORTS) stopBridge(port);
+  stopWslAlive();
   const runner = dockerRunner();
   if (runner) dockerRun(runner, ["compose", "-f", composePath(runner), "down"]);
   console.log("infra: остановлена (данные сохранены).");
 } else if (cmd === "reset") {
   stopS3Dev();
   for (const port of FORWARDED_PORTS) stopBridge(port);
+  stopWslAlive();
   const runner = dockerRunner();
   if (runner) dockerRun(runner, ["compose", "-f", composePath(runner), "down", "-v"]);
   execSync(`rm -rf "${join(infraDir, "s3-data")}"`, { shell: true });
