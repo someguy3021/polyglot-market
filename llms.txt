@@ -1,0 +1,42 @@
+# Polyglot Market — карта для ИИ-агентов
+
+> Монорепа: интернет-маркетплейс (покупатель/продавец/модератор/админ) с **одним OpenAPI-контрактом** и **двумя реализациями бекенда** (Laravel 12, NestJS 11) и **семью фронтендов** (Vue 3 Quasar, Vue 2.7, Angular 20, React 19, Nuxt, Next.js, SvelteKit). Доказательство совместимости — conformance-сьют 17/17 против обоих бекендов.
+
+## Ключевые факты
+
+- Контракт: `shared/api-spec/openapi.yaml` (OAS 3.0.3, 38 операций) — единственный источник правды.
+- Схема БД: `shared/db/migrations/*.sql` (PostgreSQL), применяется Node-раннером `pnpm db:migrate`. Laravel-миграции и TypeORM synchronize запрещены.
+- SDK: `packages/api-client` (typescript-axios из контракта, закоммичен; перегенерация — `pnpm generate:clients`, требует Java).
+- Активен ровно один бекенд: Laravel :8000 или NestJS :3000. Фронты: quasar :9000, vue2 :9001, angular :4200, react :3001, nuxt :3002, next :3003, sveltekit :3004.
+- Инфраструктура: `pnpm infra:up` — postgres :5432 + MinIO :9002 в Docker (fallback: встроенный s3rver). Настройка: `pnpm doctor && pnpm setup`.
+- Идемпотентность оформления: заголовок `Idempotency-Key` (UUID) на POST /orders.
+- E2E: `packages/e2e` (Playwright, channel:chrome), conformance: `packages/conformance` (ajv по схеме).
+
+## ADR
+
+| ADR | Решение |
+|---|---|
+| 001 | PostgreSQL — единственная СУБД (infra в Docker) |
+| 002 | Общие SQL-миграции + Node-раннер (не artisan, не TypeORM sync) |
+| 003 | Явные pnpm doctor/setup/start, никакого postinstall-колдовства |
+| 004 | OpenAPI 3.0.3, SDK typescript-axios закоммичен |
+| 005 | Conformance-тесты контракта в v1 |
+| 006 | Один активный бекенд одновременно |
+| 007 | Docker только комбо-профилями из корня репы |
+| 008 | Медиа MinIO/S3 с первого дня (fallback s3rver) |
+| 009 | Целевая платформа WSL2/Linux/macOS |
+| 010 | Фабрика экстрактов публична, lockfile, честная история |
+| 011 | Идемпотентность заказов через Idempotency-Key |
+
+## Сценарии проверки
+
+```bash
+pnpm doctor && pnpm setup && pnpm start   # панель :5555
+pnpm spec:lint                            # spectral, 0 ошибок
+pnpm conformance                          # 17/17 против бекенда (CONFORMANCE_BASE_URL)
+cd backend/laravel && vendor/bin/phpunit tests/Unit   # 7/7
+cd backend/nestjs && npx vitest run                   # 7/7
+pnpm --dir packages/e2e test              # E2E Playwright
+```
+
+Полная документация: `docs/README.md` (карта), `docs/architecture/01-overview.md`, `docs/decisions/` (ADR-001..011), `docs/log/` (журнал сессий).

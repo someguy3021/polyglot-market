@@ -1,0 +1,132 @@
+name: CI
+
+# Стратифицированный CI (фича 15): быстрые проверки на каждый push,
+# полная e2e-матрица 2×7 — по расписанию (nightly), подключается в конце разработки.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 3 * * *" # nightly: полная матрица
+
+jobs:
+  static:
+    name: Линт и контракт
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install
+      - name: Spectral — линт контракта
+        run: pnpm spec:lint
+      - name: SDK не протух (перегенерация не даёт диффа)
+        run: |
+          pnpm generate:clients
+          git diff --exit-code packages/api-client || (echo "SDK устарел — запусти pnpm generate:clients и закоммить" && exit 1)
+
+  backend-laravel:
+    name: Laravel — юниты
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: pgsql, sodium, gd
+      - name: composer install
+        run: cd backend/laravel && composer install --no-interaction
+      - name: PHPUnit (юниты без БД)
+        run: cd backend/laravel && vendor/bin/phpunit tests/Unit
+
+  backend-nestjs:
+    name: NestJS — юниты и сборка
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install
+      - name: Vitest (юниты без БД)
+        run: pnpm --dir backend/nestjs test
+      - name: Сборка
+        run: pnpm --dir backend/nestjs build
+
+  frontend-types:
+    name: Фронты — типизация
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        front: [vue-quasar, react]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install
+      - name: Типизация ${{ matrix.front }}
+        run: pnpm --dir frontend/${{ matrix.front }} exec vue-tsc --noEmit || pnpm --dir frontend/${{ matrix.front }} exec tsc --noEmit
+
+  # Полная e2e-матрица 2×7 — nightly (подключается к релизу, фаза 5)
+  e2e-matrix:
+    if: github.event_name == 'schedule'
+    name: E2E матрица (${{ matrix.front }} × ${{ matrix.back }})
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: polyglot
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: polyglot
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U polyglot" --health-interval 5s --health-retries 20
+    strategy:
+      matrix:
+        back: [laravel, nestjs]
+        front: [vue-quasar, react]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install
+      - run: node scripts/db.mjs migrate && node scripts/db.mjs seed
+      - name: Поднять бекенд ${{ matrix.back }}
+        run: |
+          if [ "${{ matrix.back }}" = "laravel" ]; then
+            cd backend/laravel && composer install --no-interaction && php artisan serve --port=8000 &
+          else
+            cd backend/nestjs && pnpm build && PORT=3000 node dist/main.js &
+          fi
+          sleep 8
+      - name: Поднять фронт ${{ matrix.front }}
+        run: cd frontend/${{ matrix.front }} && (pnpm dev &) && sleep 12
+      - name: Conformance против ${{ matrix.back }}
+        run: pnpm conformance
+        env:
+          E2E_FRONT_URL: http://127.0.0.1:9000
+      - name: E2E ${{ matrix.front }} × ${{ matrix.back }}
+        run: pnpm --dir packages/e2e test
+        env:
+          E2E_FRONT_URL: ${{ matrix.front == 'vue-quasar' && 'http://127.0.0.1:9000' || format('http://127.0.0.1:{0}', matrix.front == 'react' && '3001' || '9000') }}
