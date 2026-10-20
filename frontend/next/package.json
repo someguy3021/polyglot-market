@@ -1,0 +1,24 @@
+{
+  "name": "@showcase/frontend-next",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SSR/RSC-фронт Next.js (App Router): shadcn-подход, Server Components читают каталог (фича 11).",
+  "scripts": {
+    "dev": "next dev -H 127.0.0.1 -p 3003",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@showcase/api-client": "workspace:*",
+    "axios": "^1.7.0",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.7.0"
+  }
+}
