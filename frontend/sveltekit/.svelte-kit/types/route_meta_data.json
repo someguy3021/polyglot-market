@@ -1,0 +1,11 @@
+{
+	"/": [
+		"src/routes/+page.ts"
+	],
+	"/cart": [],
+	"/checkout": [],
+	"/login": [],
+	"/orders": [],
+	"/product/[id]": [],
+	"/register": []
+}
