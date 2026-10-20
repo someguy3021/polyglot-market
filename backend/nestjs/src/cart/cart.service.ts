@@ -28,8 +28,16 @@ export class CartService {
   /** Гостевая (по X-Cart-Token) или аккаунтная корзина; нового гостя создаём с новым токеном. */
   async resolve(actor: Actor): Promise<{ cart: CartEntity; createdToken?: string }> {
     if (actor.userId) {
-      const existing = await this.carts.findOneBy({ userId: actor.userId, converted: false });
-      if (existing) return { cart: existing };
+      // Схема: unique(user_id) — ровно одна корзина на пользователя; после заказа
+      // переиспользуем строку, сбрасывая converted (паритет с Laravel firstOrCreate).
+      const existing = await this.carts.findOneBy({ userId: actor.userId });
+      if (existing) {
+        if (existing.converted) {
+          existing.converted = false;
+          await this.carts.save(existing);
+        }
+        return { cart: existing };
+      }
       const cart = await this.carts.save(this.carts.create({ userId: actor.userId, converted: false }));
       return { cart };
     }

@@ -6,6 +6,8 @@ import { ContractError, ContractExceptionFilter } from "./contract-exception.fil
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // CORS: фронты живут на своих портах (демо-среда — любой origin)
+  app.enableCors({ origin: true, exposedHeaders: ["X-Cart-Token"] });
   // Ошибки валидации DTO — сразу в формате контракта (422 + details)
   app.useGlobalPipes(
     new ValidationPipe({
