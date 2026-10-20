@@ -1,0 +1,33 @@
+{
+  "name": "@showcase/frontend-angular",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Фронт Angular: standalone-компоненты, сигналы, Angular Material (фича 09).",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve --host 127.0.0.1 --port 4200",
+    "build": "ng build"
+  },
+  "dependencies": {
+    "@angular/animations": "^20.1.8",
+    "@angular/cdk": "^20.0.0",
+    "@angular/common": "^20.0.0",
+    "@angular/compiler": "^20.0.0",
+    "@angular/core": "^20.0.0",
+    "@angular/forms": "^20.0.0",
+    "@angular/material": "^20.0.0",
+    "@angular/platform-browser": "^20.0.0",
+    "@angular/platform-browser-dynamic": "^20.0.0",
+    "@angular/router": "^20.0.0",
+    "@showcase/api-client": "workspace:*",
+    "rxjs": "^7.8.0",
+    "tslib": "^2.6.0",
+    "zone.js": "^0.15.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^20.0.0",
+    "@angular/cli": "^20.0.0",
+    "@angular/compiler-cli": "^20.0.0",
+    "typescript": "^5.7.0"
+  }
+}

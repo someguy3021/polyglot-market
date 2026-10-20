@@ -10,7 +10,7 @@ import {
   OrdersApi,
   SellerApi,
   ServiceApi,
-} from "./generated";
+} from "./generated/index";
 
 export interface ApiClientOptions {
   /** Адрес бекенда: http://localhost:8000 (Laravel) или http://localhost:3000 (NestJS) */
@@ -61,4 +61,4 @@ export function createApiClient(options: ApiClientOptions): ApiClient {
   };
 }
 
-export * from "./generated";
+export * from "./generated/index";
