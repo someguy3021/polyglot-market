@@ -128,6 +128,8 @@ class OrdersController extends Controller
             if ($promo) {
                 $promo->increment('used_count');
             }
+            // корзина после оформления пуста: позиции списаны в заказ
+            $cart->items()->delete();
             $cart->update(['converted' => true]);
             IdempotencyKey::create(['key' => $key, 'user_id' => $user->id, 'order_id' => $order->id]);
 

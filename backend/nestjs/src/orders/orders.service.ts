@@ -148,6 +148,8 @@ export class OrdersService {
       }
 
       if (promo) await manager.increment(PromoCodeEntity, { id: promo.id }, "usedCount", 1);
+      // корзина после оформления пуста: позиции списаны в заказ
+      await manager.remove(cartItems);
       cart.converted = true;
       await manager.save(cart);
       await manager.save(manager.create(IdempotencyKeyEntity, { key: idempotencyKey, userId, orderId: order.id }));

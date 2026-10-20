@@ -15,7 +15,17 @@ class CartResolver
     public function resolve(Request $request): Cart
     {
         if ($user = $request->user()) {
-            return Cart::firstOrCreate(['user_id' => $user->id], ['converted' => false]);
+            $cart = Cart::where('user_id', $user->id)->first();
+            if ($cart) {
+                // после оформления корзина converted — новый цикл покупок её оживляет
+                if ($cart->converted) {
+                    $cart->update(['converted' => false]);
+                }
+
+                return $cart;
+            }
+
+            return Cart::create(['user_id' => $user->id, 'converted' => false]);
         }
 
         $token = $request->header('X-Cart-Token');

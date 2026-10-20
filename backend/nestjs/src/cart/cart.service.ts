@@ -42,8 +42,15 @@ export class CartService {
       return { cart };
     }
     if (actor.cartToken) {
-      const cart = await this.carts.findOneBy({ token: actor.cartToken, converted: false });
-      if (cart && cart.userId === null) return { cart };
+      const cart = await this.carts.findOneBy({ token: actor.cartToken });
+      if (cart && cart.userId === null) {
+        if (cart.converted) {
+          cart.converted = false;
+          await this.carts.save(cart);
+        }
+
+        return { cart };
+      }
     }
     const token = randomUUID();
     const cart = await this.carts.save(this.carts.create({ token, converted: false }));
