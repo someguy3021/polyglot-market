@@ -20,11 +20,14 @@
 | NestJS-бекенд (:3000) | `cd backend/nestjs && pnpm build && node dist/main.js` |
 | Линт / типы (корень) | `pnpm lint` / `pnpm typecheck` |
 | Панель управления (:5555) | `pnpm start` (tsx scripts/panel/manager.ts; проверено, сессия 02) |
-| E2E-матрица (фронт × бекенд) | `pnpm test:e2e` *(фаза 4)* |
+| E2E Playwright | `pnpm --dir packages/e2e test` (channel:chrome; E2E_FRONT_URL) — 2/2 quasar×laravel |
+| Юниты Laravel | `cd backend/laravel && vendor/bin/phpunit tests/Unit` — 7/7 |
+| Юниты NestJS | `pnpm --dir backend/nestjs test` (vitest) — 7/7 |
+| Фабрика экстрактов | `pnpm extract --front=<имя> --back=<имя> [--ci] [--dry-run]` |
 
 Особенности: **порты этой машины** — laravel на 8010 (8000 занят соседним docker-проектом `engineering-family`, см. ADR-009), nestjs 3000, панель 5555 (план), postgres 5432, s3 9002 (console 9003). Инфра живёт в WSL-docker (дистрибутив Ubuntu-24.04); при недоступности образа MinIO — s3rver-fallback на :9002 (ADR-008). Демо-аккаунты всех ролей `*@demo.dev` / пароль `password` (сидами). Схема БД меняется ТОЛЬКО общими SQL-миграциями `shared/db/migrations` (ADR-002); artisan-миграции и TypeORM synchronize запрещены. Сгенерированный SDK `packages/api-client` коммитится; перегенерация требует Java (ADR-004). Секреты — только локальные `.env`; JWT_SECRET общий у обоих бекендов (токены взаимозаменяемы, проверено). Windows-native не поддерживается — WSL2 (ADR-009).
 
-_Проверено: 2026-10-19 (сессия 02 — infra/migrate/seed/serve/conformance прогнаны на этой машине)._
+_Проверено: 2026-10-20 (сессии 02–05: infra/migrate/seed/serve/conformance/E2E/панель прогнаны на этой машине; WSL-docker стабилен с Windows-якорём)._
 
 _Таблица — канон: любой тест/скрипт проверки, существующий в репе, обязан быть здесь.
 Нашёл скрипт, которого нет в таблице, — это док-долг: внеси. Пометку «Проверено»
