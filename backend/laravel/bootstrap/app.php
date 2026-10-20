@@ -77,14 +77,16 @@ $app = Application::configure(basePath: dirname(__DIR__))
 return $app;
 
 /** Собирает единый формат ошибки из контракта (shared/api-spec/openapi.yaml → Error). */
-function json_error(int $status, string $error, string $message, array $details = []): JsonResponse
-{
-    $body = ['status' => $status, 'error' => $error, 'message' => $message];
-    if ($details !== []) {
-        $body['details'] = collect($details)
-            ->map(fn ($messages) => array_values((array) $messages))
-            ->all();
-    }
+if (! function_exists('json_error')) {
+    function json_error(int $status, string $error, string $message, array $details = []): JsonResponse
+    {
+        $body = ['status' => $status, 'error' => $error, 'message' => $message];
+        if ($details !== []) {
+            $body['details'] = collect($details)
+                ->map(fn ($messages) => array_values((array) $messages))
+                ->all();
+        }
 
-    return response()->json($body, $status);
+        return response()->json($body, $status);
+    }
 }
