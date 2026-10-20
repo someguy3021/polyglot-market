@@ -34,6 +34,7 @@ data/postgres/
 *.tsbuildinfo
 
 # generated (committed on purpose: packages/api-client — see ADR-004)
+!packages/api-client/dist/
 
 # OS / editor
 .DS_Store
