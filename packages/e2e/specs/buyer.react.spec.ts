@@ -22,6 +22,8 @@ test("react: покупатель — корзина гостя → checkout →
   await expect(page).toHaveURL(/\/$|\/checkout|\/orders/, { timeout: 15_000 });
 
   await page.goto("/checkout");
+  // ждём загрузку корзины (пока висит «Корзина пуста» — клики по промо бессмысленны)
+  await expect(page.getByText("Корзина пуста")).toBeHidden({ timeout: 15_000 });
   await page.getByLabel("Промокод (например WELCOME10)").fill("WELCOME10");
   await page.getByRole("button", { name: "Проверить" }).click();
   await expect(page.locator(".MuiChip-label").first()).toBeVisible({ timeout: 10_000 });

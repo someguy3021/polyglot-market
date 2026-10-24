@@ -42,7 +42,8 @@ export default function CheckoutPage() {
   const canPlace = (cart?.items.length ?? 0) > 0 && method !== "" && address.line1 !== "" && address.city !== "" && address.zip !== "";
 
   async function checkPromo() {
-    if (!promoCode) return;
+    // корзина грузится асинхронно: до её прихода клик просто ничего не делает
+    if (!promoCode || !cart) return;
     try {
       const res = await api.orders.validatePromo({ code: promoCode, subtotal: cart!.subtotal });
       setPromo(res.data as PromoView);

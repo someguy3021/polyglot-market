@@ -1,5 +1,6 @@
 // Сессия: useState (SSR-безопасный) + localStorage-токены на клиенте.
-import { api, errorMessage, setOrderIdempotencyKey } from "./useApi";
+// Клиент API создаётся на вызов (useApi() — композабл с runtime-config), не на уровне модуля.
+import { errorMessage, setOrderIdempotencyKey, useApi } from "./useApi";
 
 export interface SessionUser {
   id: string;
@@ -23,6 +24,7 @@ export const useCart = () =>
 
 export async function loadCart() {
   const cart = useCart();
+  const api = useApi();
   try {
     const res = await api.cart.getCart();
     const body = res.data as any;
@@ -34,6 +36,7 @@ export async function loadCart() {
 
 export async function addToCart(productId: string, quantity = 1): Promise<string | null> {
   const cart = useCart();
+  const api = useApi();
   try {
     const res = await api.cart.addCartItem({ productId, quantity });
     const header = (res.headers?.["x-cart-token"] ?? res.headers?.["X-Cart-Token"]) as string | undefined;
@@ -46,6 +49,7 @@ export async function addToCart(productId: string, quantity = 1): Promise<string
 }
 
 async function afterAuth(token: string, user: SessionUser) {
+  const api = useApi();
   const state = useSession();
   if (import.meta.client) {
     localStorage.setItem("pm.token", token);
@@ -65,11 +69,13 @@ async function afterAuth(token: string, user: SessionUser) {
 }
 
 export async function login(email: string, password: string) {
+  const api = useApi();
   const res = await api.auth.login({ email, password });
   await afterAuth(res.data.token, res.data.user as SessionUser);
 }
 
 export async function register(name: string, email: string, password: string) {
+  const api = useApi();
   const res = await api.auth.register({ name, email, password });
   await afterAuth(res.data.token, res.data.user as SessionUser);
 }

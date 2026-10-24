@@ -14,10 +14,16 @@ export interface SessionUser {
 
 let idempotencyKey: string | undefined;
 
+// Адрес бекенда: runtime /config.js (docker) или дефолт :8000. Один источник —
+// SDK и прямые fetch'и (checkout) обязаны читать его, никаких захардкоженных URL.
+export const API_BASE =
+  (typeof window !== "undefined" && window.API_URL) || "http://127.0.0.1:8000";
+
 @Injectable({ providedIn: "root" })
 export class SessionService {
+  readonly apiBase = API_BASE;
   readonly api = createApiClient({
-    baseURL: (typeof window !== "undefined" && window.API_URL) || "http://127.0.0.1:8000",
+    baseURL: API_BASE,
     getToken: () => localStorage.getItem("pm.token") ?? undefined,
     getCartToken: () => localStorage.getItem("pm.cart") ?? undefined,
     getIdempotencyKey: () => idempotencyKey,

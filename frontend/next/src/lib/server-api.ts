@@ -26,7 +26,10 @@ export async function fetchCatalog(params: Record<string, string> = {}): Promise
   data: Product[];
   meta: { currentPage: number; lastPage: number; perPage: number; total: number };
 }> {
-  const qs = new URLSearchParams(params).toString();
+  // пустые значения (category= из формы фильтров) выкидываем: API отвечает 422
+  // на пустую категорию, а RSC-страница — 500 на неуспешный fetch
+  const clean = Object.fromEntries(Object.entries(params).filter(([, v]) => v !== ""));
+  const qs = new URLSearchParams(clean).toString();
   const res = await fetch(`${API_URL}/products${qs ? `?${qs}` : ""}`, { next: { revalidate: 0 } });
   if (!res.ok) throw new Error(`catalog ${res.status}`);
   return res.json();

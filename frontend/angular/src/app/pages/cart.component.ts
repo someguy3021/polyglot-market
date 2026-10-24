@@ -47,6 +47,11 @@ export class CartComponent {
   public session = inject(SessionService);
   error = signal("");
 
+  constructor() {
+    // при прямой загрузке /cart сигнал сессии пуст — тянем корзину с сервера
+    void this.session.loadCart();
+  }
+
   image(item: any): string {
     return item.product.images?.find((x: any) => x.isPrimary)?.url ?? item.product.images?.[0]?.url ?? "";
   }

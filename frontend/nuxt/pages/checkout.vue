@@ -4,6 +4,11 @@ const cart = useCart();
 const user = useSession();
 const router = useRouter();
 
+// при прямой загрузке /checkout (F5, внешний переход) useState пуст — тянем корзину с сервера
+onMounted(() => {
+  void loadCart();
+});
+
 const { data: methods } = await useAsyncData("shipping", () => $fetch(`${useRuntimeConfig().public.apiUrl}/shipping-methods`));
 
 const method = ref("");

@@ -1,6 +1,7 @@
 "use client";
 
 // Карточка товара: клиентский компонент на SDK (добавление в корзину).
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api, errorMessage } from "@/lib/client-api";
 
@@ -31,7 +32,11 @@ export default function ProductPage() {
   async function add() {
     if (!product) return;
     try {
-      await api.cart.addCartItem({ productId: product.id, quantity: qty });
+      const res = await api.cart.addCartItem({ productId: product.id, quantity: qty });
+      // гостевая корзина: токен из заголовка ответа — без него корзина «потеряется»
+      const header = (res.headers as Record<string, string | string[] | undefined> | undefined)?.["x-cart-token"]
+        ?? (res.headers as Record<string, string | string[] | undefined> | undefined)?.["X-Cart-Token"];
+      if (typeof header === "string") localStorage.setItem("pm.cart", header);
       setError("");
     } catch (e) {
       setError(errorMessage(e));

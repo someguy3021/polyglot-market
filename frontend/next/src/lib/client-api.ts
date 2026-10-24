@@ -11,8 +11,7 @@ export function setOrderIdempotencyKey(key: string | undefined) {
 export const api: ApiClient = createApiClient({
   baseURL:
     (typeof window !== "undefined" && window.API_URL) ||
-    process.env.NEXT_PUBLIC_API_URL ??
-    "http://127.0.0.1:8000",
+    (process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000"),
   getToken: () => (typeof localStorage !== "undefined" ? localStorage.getItem("pm.token") ?? undefined : undefined),
   getCartToken: () => (typeof localStorage !== "undefined" ? localStorage.getItem("pm.cart") ?? undefined : undefined),
   getIdempotencyKey: () => idempotencyKey,

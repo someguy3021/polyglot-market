@@ -3,7 +3,8 @@ const api = useApi();
 const route = useRoute();
 
 const { data } = await useAsyncData(`product-${route.params.id}`, async () => (await api.catalog.getProduct(route.params.id as string)).data);
-const product = computed(() => data.value?.data as any);
+// GET /products/{id} отдаёт товар напрямую (AxiosResponse.data — уже товар)
+const product = computed(() => data.value as any);
 
 const qty = ref(1);
 const error = ref("");

@@ -1,6 +1,11 @@
 <script setup lang="ts">
 const cart = useCart();
 
+// при прямой загрузке /cart (F5, внешний переход) useState пуст — тянем корзину с сервера
+onMounted(() => {
+  void loadCart();
+});
+
 async function setQty(itemId: string, quantity: number) {
   if (quantity < 1) return;
   const api = useApi();

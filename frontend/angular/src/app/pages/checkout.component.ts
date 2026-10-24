@@ -83,7 +83,7 @@ export class CheckoutComponent {
   constructor() {
     void (async () => {
       await this.session.loadCart();
-      const res = await fetch("http://127.0.0.1:8000/shipping-methods");
+      const res = await fetch(`${this.session.apiBase}/shipping-methods`);
       const body = await res.json();
       this.shipping.set(body.data);
       if (body.data.length) this.method.set(body.data[0].code);

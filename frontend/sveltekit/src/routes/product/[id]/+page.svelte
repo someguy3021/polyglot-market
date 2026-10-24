@@ -1,17 +1,14 @@
 <script lang="ts">
-  import { api, errorMessage } from '$lib/api';
   import { addToCart } from '$lib/session.svelte';
 
   let { data } = $props();
 
-  let product = $state<any>(null);
+  // товар приходит из load (+page.ts) — SSR и клиентская навигация
+  let product = $derived<any>(data.product);
+
   let qty = $state(1);
   let current = $state('');
   let error = $state('');
-
-  $effect(() => {
-    api.catalog.getProduct(data.id).then((res) => (product = res.data)).catch((e) => (error = errorMessage(e)));
-  });
 
   const primary = $derived(
     current || product?.images?.find((i: any) => i.isPrimary)?.url || product?.images?.[0]?.url || ''

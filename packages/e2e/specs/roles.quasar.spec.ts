@@ -87,14 +87,17 @@ test("admin: меняет статус свежего заказа new → paid"
   expect(orderRes.status).toBe(201);
   expect(order.status).toBe("new");
 
-  // UI админа: находим строку заказа и переводим new → paid
+  // UI админа: находим строку заказа и переводим new → paid (QSelect: клик по полю,
+  // затем по опции в выскакивающем меню q-menu)
   await login(page, "admin@demo.dev", "password");
   await page.goto("/admin/orders");
   await expect(page.locator("tbody tr").first()).toBeVisible({ timeout: 15_000 });
   const row = page.locator("tr", { hasText: order.id.slice(0, 8) }).first();
   await expect(row).toBeVisible({ timeout: 10_000 });
-  await row.locator("select").selectOption("paid", { force: true });
+  await row.locator(".q-select").click();
+  await page.locator(".q-menu .q-item", { hasText: "оплачен" }).click();
 
-  // статус подтвердился на сервере (select перерисовался с опциями paid → …)
-  await expect(row.locator("select")).toHaveValue(/paid/, { timeout: 10_000 });
+  // статус подтвердился на сервере: QSelect показывает сырое значение модели (paid),
+  // русская метка живёт только в опциях меню
+  await expect(row).toContainText("paid", { timeout: 10_000 });
 });
