@@ -1,9 +1,12 @@
 import { readFileSync, writeFileSync, existsSync, cpSync, mkdirSync } from "fs";
+import { execSync } from "node:child_process";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
 // Фабрика экстрактов (фича 16, ADR-010): pnpm extract --front=X --back=Y --out=DIR [--ci] [--dry-run]
-// Генерирует автономный репозиторий «1 фронт + 1 бекенд» из мегарепы.
+// [--no-git] [--no-lockfile]. Генерирует автономный репозиторий «1 фронт + 1 бекенд» из мегарепы:
+// свой package.json/README/workspace, опциональный CI, свой lockfile (pnpm install --lockfile-only),
+// git init с честным initial commit (история не фальсифицируется).
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -20,7 +23,7 @@ const dryRun = hasFlag("dry-run");
 const withCi = hasFlag("ci");
 
 if (!front || !back) {
-  console.log("использование: pnpm extract --front=<react|quasar|...> --back=<laravel|nestjs> [--out=DIR] [--ci] [--dry-run]");
+  console.log("использование: pnpm extract --front=<react|quasar|...> --back=<laravel|nestjs> [--out=DIR] [--ci] [--dry-run] [--no-git] [--no-lockfile]");
   process.exit(1);
 }
 
@@ -164,4 +167,23 @@ jobs:
 }
 
 console.log(`✅ Экстракт создан: ${out}`);
-console.log("Дальше: git init + первый коммит; pnpm install внутри экстракта.");
+
+// Свой lockfile экстракта (ADR-010): pnpm резолвит workspace-зависимости,
+// не скачивая node_modules
+if (!hasFlag("no-lockfile")) {
+  console.log("lockfile: pnpm install --lockfile-only…");
+  execSync("pnpm install --lockfile-only", { cwd: out, stdio: "inherit", shell: process.platform === "win32" });
+}
+
+// git init с честным initial commit (ADR-010: история не фальсифицируется)
+if (!hasFlag("no-git")) {
+  const megaCommit = execSync("git rev-parse --short HEAD", { cwd: ROOT, encoding: "utf8" }).trim();
+  execSync('git init -b main', { cwd: out, stdio: "ignore", shell: process.platform === "win32" });
+  execSync("git add -A", { cwd: out, stdio: "ignore", shell: process.platform === "win32" });
+  execSync(
+    `git -c user.name="polyglot-extract" -c user.email="extract@demo.dev" commit -m "initial commit: ${front} + ${back} extract from polyglot-market@${megaCommit}"`,
+    { cwd: out, stdio: "ignore", shell: process.platform === "win32" },
+  );
+  console.log(`git: репозиторий инициализирован (источник: polyglot-market@${megaCommit})`);
+}
+console.log("Дальше: pnpm install внутри экстракта (pull lockfile), pnpm setup, pnpm start.");

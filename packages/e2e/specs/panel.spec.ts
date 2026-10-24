@@ -1,7 +1,6 @@
 import { expect, test, beforeAll, afterAll } from "@playwright/test";
 import { spawn, type ChildProcess } from "node:child_process";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
 /**
  * E2E самой панели (фича 06/этап 5.1): менеджер поднимается на отдельном порту,
@@ -10,7 +9,8 @@ import { fileURLToPath } from "node:url";
  */
 const PANEL_PORT = 5577;
 const PANEL = `http://127.0.0.1:${PANEL_PORT}`;
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
+// cwd прогона — packages/e2e (playwright-transpile не знает import.meta)
+const ROOT = join(process.cwd(), "..", "..");
 
 let manager: ChildProcess;
 
@@ -33,7 +33,13 @@ beforeAll(async () => {
 }, 60_000);
 
 afterAll(() => {
-  manager?.kill();
+  if (!manager?.pid) return;
+  // pnpm-обёртка переживает kill() — глушим дерево (Windows)
+  if (process.platform === "win32") {
+    spawn("taskkill", ["/PID", String(manager.pid), "/T", "/F"], { shell: true, stdio: "ignore" });
+  } else {
+    manager.kill();
+  }
 });
 
 test("панель: карточки приложений и таблица портов рендерятся", async ({ page }) => {
@@ -66,8 +72,13 @@ test("панель: запуск и остановка vue2 через кноп�
   await expect(vue2card).toContainText("остановлено", { timeout: 30_000 });
 });
 
-test("панель: Run setup скрыт при настроенной среде", async ({ page }) => {
+test("панель: кнопка Run setup соответствует состоянию среды", async ({ page }) => {
+  const status = (await (await fetch(`${PANEL}/api/status`)).json()) as { setupDone: boolean };
   await page.goto(PANEL);
-  // на этой машине .env существует (pnpm setup выполнялся) — кнопка не нужна
-  await expect(page.locator("#run-setup")).toBeHidden();
+  if (status.setupDone) {
+    await expect(page.locator("#run-setup")).toBeHidden();
+  } else {
+    // среда не заведена — кнопка предложит pnpm setup (сам прогон в E2E не запускаем)
+    await expect(page.locator("#run-setup")).toBeVisible();
+  }
 });

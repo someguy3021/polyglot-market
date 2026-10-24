@@ -16,7 +16,11 @@ function el(tag, attrs = {}, ...children) {
     if (key === "class") node.className = value;
     else if (key === "text") node.textContent = value;
     else if (key.startsWith("on")) node.addEventListener(key.slice(2), value);
-    else node.setAttribute(key, value);
+    else if (typeof value === "boolean") {
+      // setAttribute("disabled", false) делает кнопку disabled — булевы атрибуты через свойство
+      if (value) node.setAttribute(key, "");
+      else node.removeAttribute(key);
+    } else node.setAttribute(key, value);
   }
   for (const child of children) node.append(child);
   return node;
@@ -101,8 +105,38 @@ function renderLogs(apps) {
     return el("span", { class: level, text: line + "\n" });
   }));
   if (nearBottom) view.scrollTop = view.scrollHeight;
+  // полный лог приложения — файлом (кнопка-заглушка /api/status заменена)
   const download = document.getElementById("download-log");
-  download.onclick = () => window.open(`/api/status`, "_blank");
+  download.onclick = () => window.open(`/api/logs/${state.selected}?download=1`, "_blank");
+}
+
+function renderSetup(payload) {
+  const note = document.getElementById("setup-note");
+  const button = document.getElementById("run-setup");
+  const group = document.getElementById("setup-group");
+  const logView = document.getElementById("setup-log");
+  const status = document.getElementById("setup-status");
+  note.textContent = payload.setupDone ? "среда настроена" : "среда не настроена — запустите `pnpm setup`";
+  button.hidden = payload.setupDone;
+  const active = payload.setup && payload.setup.running;
+  if (payload.setup) {
+    group.hidden = false;
+    status.textContent = active ? "выполняется…" : "завершён (код в логе)";
+    const nearBottom = logView.scrollHeight - logView.scrollTop - logView.clientHeight < 60;
+    logView.replaceChildren(...payload.setup.tail.map((line) => el("span", { text: line + "\n" })));
+    if (nearBottom) logView.scrollTop = logView.scrollHeight;
+  } else {
+    group.hidden = true;
+  }
+}
+
+async function runSetup() {
+  try {
+    await api("/api/setup", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+  } catch (err) {
+    alert(err.message);
+  }
+  await refresh();
 }
 
 async function act(path, key) {
@@ -121,9 +155,7 @@ async function act(path, key) {
 async function refresh() {
   try {
     const payload = await api("/api/status");
-    document.getElementById("setup-note").textContent = payload.setupDone
-      ? "среда настроена"
-      : "среда не настроена — запустите `pnpm setup`";
+    renderSetup(payload);
     render(payload.apps);
   } catch {
     /* менеджер перезапускается — попробуем в следующий тик */
@@ -131,5 +163,6 @@ async function refresh() {
 }
 
 document.getElementById("stop-all").addEventListener("click", () => act("/api/stop-all", ""));
+document.getElementById("run-setup").addEventListener("click", runSetup);
 await refresh();
 setInterval(refresh, 2000);

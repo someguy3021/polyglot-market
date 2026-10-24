@@ -12,8 +12,18 @@
       <h1>Polyglot Market</h1>
       <p class="sub">1 контракт · 2 бекенда · 7 фронтов — <span id="setup-note"></span></p>
     </div>
-    <button id="stop-all" class="ghost">Остановить всё</button>
+    <div>
+      <button id="run-setup" class="ghost" hidden>Run setup</button>
+      <button id="stop-all" class="ghost">Остановить всё</button>
+    </div>
   </header>
+
+  <section class="group" id="setup-group" hidden>
+    <h2>pnpm setup <span id="setup-status" class="meta"></span>
+      <a id="download-setup" class="ghost small" href="/api/logs-setup" target="_blank">Скачать лог setup</a>
+    </h2>
+    <pre id="setup-log"></pre>
+  </section>
 
   <main>
     <section id="backends" class="group">

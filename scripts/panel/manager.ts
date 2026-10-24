@@ -15,12 +15,16 @@ mkdirSync(LOG_DIR, { recursive: true });
 interface RunningApp {
   proc: ChildProcess;
   port: number;
+  logPath: string;
   logFile: WriteStream;
   tail: string[]; // последние N строк с уровнем
   startedAt: number;
 }
 
 const running = new Map<string, RunningApp>();
+
+// Прогон `pnpm setup` из панели (кнопка «Run setup»): процесс + живой хвост лога.
+let setup: { proc: ChildProcess; logPath: string; tail: string[]; running: boolean } | null = null;
 
 function isFree(port: number): Promise<boolean> {
   return new Promise((resolveProbe) => {
@@ -66,7 +70,8 @@ function startApp(spec: AppSpec): Promise<{ port: number }> {
       .then((port) => {
         mkdirSync(LOG_DIR, { recursive: true });
         const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-        const logFile = createWriteStream(join(LOG_DIR, `${spec.key}-${stamp}.log`), { flags: "a" });
+        const logPath = join(LOG_DIR, `${spec.key}-${stamp}.log`);
+        const logFile = createWriteStream(logPath, { flags: "a" });
         const tail: string[] = [];
 
         const shellCommand = spec.command.replace("{port}", String(port));
@@ -95,7 +100,7 @@ function startApp(spec: AppSpec): Promise<{ port: number }> {
           running.delete(spec.key);
         });
 
-        running.set(spec.key, { proc, port, logFile, tail, startedAt: Date.now() });
+        running.set(spec.key, { proc, port, logPath, logFile, tail, startedAt: Date.now() });
         resolveStart({ port });
       })
       .catch(rejectStart);
@@ -118,6 +123,34 @@ function stopAll(): number {
   const count = running.size;
   for (const key of [...running.keys()]) stopApp(key);
   return count;
+}
+
+// Run setup: заводит среду (install + .env + infra + migrate + seed) из панели.
+// Хвост вывода доступен в /api/status; лог лежит в .infra/logs/setup-*.log.
+function startSetup(): void {
+  if (setup?.running) throw new Error("setup уже выполняется");
+  mkdirSync(LOG_DIR, { recursive: true });
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const logPath = join(LOG_DIR, `setup-${stamp}.log`);
+  const logFile = createWriteStream(logPath, { flags: "a" });
+  const tail: string[] = [];
+  const shellCommand = process.platform === "win32" ? "pnpm setup" : "pnpm setup";
+  const proc = spawn(shellCommand, { cwd: ROOT, shell: true, env: process.env });
+  const ingest = (src: NodeJS.ReadableStream) => {
+    createInterface({ input: src }).on("line", (line) => {
+      const record = `[${new Date().toISOString().slice(11, 19)}] ${line}`;
+      tail.push(record);
+      if (tail.length > TAIL_LINES) tail.shift();
+      logFile.write(record + "\n");
+    });
+  };
+  ingest(proc.stdout!);
+  ingest(proc.stderr!);
+  proc.on("exit", (code) => {
+    logFile.write(`[exit] setup завершён, код ${code}\n`);
+    if (setup) setup.running = false;
+  });
+  setup = { proc, logPath, tail, running: true };
 }
 
 async function healthOf(spec: AppSpec): Promise<"up" | "down"> {
@@ -151,7 +184,10 @@ async function statusPayload() {
   );
   return {
     apps,
-    setupDone: existsSync(join(ROOT, ".env")) && existsSync(join(ROOT, "database.sqlite")),
+    setupDone: existsSync(join(ROOT, ".env")),
+    setup: setup
+      ? { running: setup.running, tail: setup.tail.slice(-30), logPath: setup.logPath }
+      : null,
     now: new Date().toISOString(),
   };
 }
@@ -193,6 +229,28 @@ const server = createServer(async (req, res) => {
     } else if (url.pathname === "/api/stop-all" && req.method === "POST") {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ ok: true, stopped: stopAll() }));
+    } else if (url.pathname === "/api/setup" && req.method === "POST") {
+      startSetup();
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: true }));
+    } else if (url.pathname.startsWith("/api/logs/") && req.method === "GET") {
+      // полный лог приложения: /api/logs/<key>?download=1 — как файл
+      const key = url.pathname.slice("/api/logs/".length);
+      const app = running.get(key);
+      if (!app) throw new Error(`приложение не запущено: ${key}`);
+      const full = readFileSync(app.logPath, "utf8");
+      const headers: Record<string, string | number> = {
+        "Content-Type": "text/plain; charset=utf-8",
+      };
+      if (url.searchParams.get("download")) {
+        headers["Content-Disposition"] = `attachment; filename="${key}-full.log"`;
+      }
+      res.writeHead(200, headers);
+      res.end(full);
+    } else if (url.pathname.startsWith("/api/logs-setup") && req.method === "GET") {
+      if (!setup) throw new Error("setup ещё не запускался");
+      res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
+      res.end(readFileSync(setup.logPath, "utf8"));
     } else {
       res.writeHead(404, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ status: 404, error: "not_found", message: "No such route." }));

@@ -94,3 +94,18 @@ tr:last-child td { border-bottom: none; }
 }
 #log-view .error { color: var(--red); }
 #log-view .warn { color: var(--amber); }
+
+#setup-log {
+  background: #010409;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  max-height: 260px;
+  overflow: auto;
+  font-family: Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+#download-setup { text-decoration: none; }
