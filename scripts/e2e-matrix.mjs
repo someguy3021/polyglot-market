@@ -57,8 +57,8 @@ for (const pair of only) {
   // покупательский путь своим файлом спеков (селекторы фреймворк-специфичны);
   // роль-сценарии — отдельным opt-in запуском specs/roles.quasar.spec.ts
   const spec = frontPort === "9000" ? "buyer.quasar.spec.ts" : "buyer.react.spec.ts";
-  const r = spawnSync("npx", ["playwright", "test", ...spec.split(" ")], {
-    cwd: "packages/e2e",
+  // через лаунчер pw-run.mjs (кэш трансформации Playwright — в репу, не в temp)
+  const r = spawnSync("pnpm", ["--dir", "packages/e2e", "test", ...spec.split(" ")], {
     stdio: "inherit",
     shell: process.platform === "win32",
     env: { ...process.env, E2E_FRONT_URL: `http://127.0.0.1:${frontPort}`, E2E_API_URL: `http://127.0.0.1:${apiPort}` },

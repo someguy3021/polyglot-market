@@ -21,6 +21,7 @@
 | Линт / типы (корень) | `pnpm lint` / `pnpm typecheck` |
 | Панель управления (:5555) | `pnpm start` (tsx scripts/panel/manager.ts; проверено, сессия 02) |
 | E2E Playwright | `pnpm --dir packages/e2e test` (channel:chrome; E2E_FRONT_URL) — 2/2 quasar×laravel |
+| Мусор тестов в temp ОС | `node scripts/check-temp.mjs` (`--clean` — удалить найденное; следы проекта в %TEMP% = красный) |
 | Юниты Laravel | `cd backend/laravel && vendor/bin/phpunit tests/Unit` — 7/7 |
 | Юниты NestJS | `pnpm --dir backend/nestjs test` (vitest) — 7/7 |
 | Фабрика экстрактов | `pnpm extract --front=<имя> --back=<имя> [--ci] [--dry-run]` |
