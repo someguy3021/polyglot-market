@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { OrderStatus } from "@showcase/api-client";
 import { api, errorMessage } from "@/lib/client-api";
 
 interface AdminOrder {
@@ -28,7 +29,7 @@ export default function AdminOrdersPage() {
 
   async function changeStatus(id: string, status: string) {
     try {
-      await api.admin.updateOrderStatus(id, { status });
+      await api.admin.updateOrderStatus(id, { status: status as OrderStatus });
       await load();
     } catch (err) {
       setError(errorMessage(err));

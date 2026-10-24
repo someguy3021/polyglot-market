@@ -1,7 +1,7 @@
 name: CI
 
 # Стратифицированный CI (фича 15): быстрые проверки на каждый push,
-# полная e2e-матрица 2×7 — по расписанию (nightly), подключается в конце разработки.
+# полная e2e-матрица 2×7 — по расписанию (nightly).
 
 on:
   push:
@@ -67,6 +67,7 @@ jobs:
     name: Фронты — типизация
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         front: [vue-quasar, react]
     steps:
@@ -82,7 +83,8 @@ jobs:
       - name: Типизация ${{ matrix.front }}
         run: pnpm --dir frontend/${{ matrix.front }} exec vue-tsc --noEmit || pnpm --dir frontend/${{ matrix.front }} exec tsc --noEmit
 
-  # Полная e2e-матрица 2×7 — nightly (подключается к релизу, фаза 5)
+  # Полная e2e-матрица 2×7 — nightly: каждая пара «фронт × бекенд» на чистых сидах,
+  # те же спеки, что в локальном pnpm e2e:matrix (фича 14).
   e2e-matrix:
     if: github.event_name == 'schedule'
     name: E2E матрица (${{ matrix.front }} × ${{ matrix.back }})
@@ -98,9 +100,12 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U polyglot" --health-interval 5s --health-retries 20
     strategy:
+      fail-fast: false
       matrix:
         back: [laravel, nestjs]
-        front: [vue-quasar, react]
+        front: [vue-quasar, vue2, react, nuxt, next, sveltekit, angular]
+    env:
+      BACK_URL: http://127.0.0.1:8010
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -111,22 +116,52 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install
-      - run: node scripts/db.mjs migrate && node scripts/db.mjs seed
-      - name: Поднять бекенд ${{ matrix.back }}
+      - name: БД — миграции и сиды
+        run: |
+          node scripts/db.mjs migrate
+          node scripts/db.mjs seed
+      - name: Поднять бекенд ${{ matrix.back }} (:8010/:3000)
         run: |
           if [ "${{ matrix.back }}" = "laravel" ]; then
-            cd backend/laravel && composer install --no-interaction && php artisan serve --port=8000 &
+            cd backend/laravel
+            composer install --no-interaction
+            nohup php artisan serve --host=127.0.0.1 --port=8010 > /tmp/laravel.log 2>&1 &
           else
-            cd backend/nestjs && pnpm build && PORT=3000 node dist/main.js &
+            pnpm --dir backend/nestjs build
+            nohup node backend/nestjs/dist/main.js > /tmp/nestjs.log 2>&1 &
           fi
-          sleep 8
+          for i in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:${{ matrix.back == 'laravel' && '8010' || '3000' }}/health > /dev/null; then echo "бекенд поднялся"; break; fi
+            sleep 2
+          done
       - name: Поднять фронт ${{ matrix.front }}
-        run: cd frontend/${{ matrix.front }} && (pnpm dev &) && sleep 12
-      - name: Conformance против ${{ matrix.back }}
-        run: pnpm conformance
-        env:
-          E2E_FRONT_URL: http://127.0.0.1:9000
+        run: |
+          BACK=http://127.0.0.1:${{ matrix.back == 'laravel' && '8010' || '3000' }}
+          case "${{ matrix.front }}" in
+            vue-quasar) (cd frontend/vue-quasar && VITE_API_URL=$BACK nohup npx vite --port 9000 > /tmp/front.log 2>&1 &) ;;
+            vue2)       (cd frontend/vue2 && VITE_API_URL=$BACK nohup npx vite --port 9001 > /tmp/front.log 2>&1 &) ;;
+            react)      (cd frontend/react && VITE_API_URL=$BACK nohup npx vite --port 3001 > /tmp/front.log 2>&1 &) ;;
+            nuxt)       (cd frontend/nuxt && NUXT_PUBLIC_API_URL=$BACK nohup npx nuxt dev > /tmp/front.log 2>&1 &) ;;
+            next)       (cd frontend/next && NEXT_PUBLIC_API_URL=$BACK nohup npx next dev -H 127.0.0.1 -p 3003 > /tmp/front.log 2>&1 &) ;;
+            sveltekit)  (cd frontend/sveltekit && VITE_API_URL=$BACK nohup npx vite dev --port 3004 > /tmp/front.log 2>&1 &) ;;
+            angular)
+              echo "window.API_URL = \"$BACK\";" > frontend/angular/public/config.js
+              (cd frontend/angular && nohup npx ng serve --host 127.0.0.1 --port 4200 > /tmp/front.log 2>&1 &)
+              ;;
+          esac
+          case "${{ matrix.front }}" in
+            vue-quasar) PORT=9000 ;; vue2) PORT=9001 ;; react) PORT=3001 ;;
+            nuxt) PORT=3002 ;; next) PORT=3003 ;; sveltekit) PORT=3004 ;; angular) PORT=4200 ;;
+          esac
+          for i in $(seq 1 90); do
+            if curl -sf http://127.0.0.1:$PORT/ > /dev/null; then echo "фронт поднялся :$PORT"; break; fi
+            sleep 2
+          done
       - name: E2E ${{ matrix.front }} × ${{ matrix.back }}
-        run: pnpm --dir packages/e2e test
+        run: pnpm --dir packages/e2e test specs/buyer.${{ matrix.front }}.spec.ts specs/roles.${{ matrix.front }}.spec.ts
         env:
-          E2E_FRONT_URL: ${{ matrix.front == 'vue-quasar' && 'http://127.0.0.1:9000' || format('http://127.0.0.1:{0}', matrix.front == 'react' && '3001' || '9000') }}
+          E2E_FRONT_URL: http://127.0.0.1:${{ matrix.front == 'vue-quasar' && '9000' || matrix.front == 'vue2' && '9001' || matrix.front == 'react' && '3001' || matrix.front == 'nuxt' && '3002' || matrix.front == 'next' && '3003' || matrix.front == 'sveltekit' && '3004' || '4200' }}
+          E2E_API_URL: http://127.0.0.1:${{ matrix.back == 'laravel' && '8010' || '3000' }}
+      - name: Логи фронта при падении
+        if: failure()
+        run: tail -40 /tmp/front.log /tmp/laravel.log /tmp/nestjs.log 2>/dev/null || true

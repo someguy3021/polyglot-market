@@ -51,7 +51,7 @@
             <q-input v-model.number="form.price" outlined dense type="number" label="Цена $" style="width: 140px" />
             <q-input v-model.number="form.stock" outlined dense type="number" label="Остаток" style="width: 140px" />
             <select v-model="form.categoryId" outlined dense label="Категория" style="min-width: 200px; padding: 8px; border: 1px solid #ccc; border-radius: 6px" class="bg-white">
-              <option v-for="c in categories" :key="c.value" :value="c.value">{{ c.text }}</option>
+              <option v-for="c in categories" :key="c.value" :value="c.value">{{ c.label }}</option>
             </select>
           </div>
         </q-card-section>

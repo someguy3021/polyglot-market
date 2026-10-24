@@ -16,7 +16,8 @@ export default function SellerProductsPage() {
 
   async function load() {
     const res = await api.seller.listSellerProducts(1, 50);
-    setProducts(res.data.data);
+    // локальный SellerProduct уже соответствует Product из контракта
+    setProducts(res.data.data as SellerProduct[]);
   }
 
   async function submit(id: string) {
