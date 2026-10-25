@@ -10,7 +10,8 @@
 - Активен ровно один бекенд: Laravel :8000 или NestJS :3000. Фронты: quasar :9000, vue2 :9001, angular :4200, react :3001, nuxt :3002, next :3003, sveltekit :3004.
 - Инфраструктура: `pnpm infra:up` — postgres :5432 + MinIO :9002 в Docker (fallback: встроенный s3rver). Настройка: `pnpm doctor && pnpm setup`.
 - Идемпотентность оформления: заголовок `Idempotency-Key` (UUID) на POST /orders.
-- E2E: `packages/e2e` (Playwright, channel:chrome), conformance: `packages/conformance` (ajv по схеме).
+- E2E: `packages/e2e` (Playwright, channel:chrome): `pnpm e2e:matrix` — полная матрица 2×7 (14/14 пар зелёные, сид-ноль на пару, бекенды по очереди) + сквозной кейс Laravel↔NestJS; E2E панели — specs/panel.spec.ts. Conformance: `packages/conformance` (ajv по схеме), 17/17 против обоих.
+- Проверки одним куском: `pnpm check:all` (spectral + юниты + conformance + E2E живой пары); фабрика: `pnpm extract` + матричный тест `node scripts/test-extracts.mjs` (14/14); docker-образы фронтов: `node scripts/test-docker-fronts.mjs` (7/7).
 
 ## ADR
 

@@ -3,7 +3,7 @@
 > **Суть:** точка входа для ИИ-агентов. L0-файл: читать целиком перед любой работой.
 > **Связанное:** [docs/README.md](./docs/README.md) — карта и панель «Сейчас»
 
-Монорепа-витрина «1 API — 2 бекенда (Laravel, NestJS) — 7 фронтов (quasar, vue2, angular, react, nuxt, next, sveltekit)»: маркетплейс с общим OpenAPI-контрактом, общей PostgreSQL и MinIO, панелью управления процессами и фабрикой автономных экстракт-репо. Тир dev-standard: T2. Ключевые принципы: контракт — источник правды; активен один бекенд; явные `pnpm doctor/setup/start` без postinstall-магии; целевая платформа WSL2/Linux/macOS (Windows — только через WSL2); везде TypeScript на Node-стороне. Сейчас репа — blueprint: дока готова, кода ещё нет (фаза 1 не начата).
+Монорепа-витрина «1 API — 2 бекенда (Laravel, NestJS) — 7 фронтов (quasar, vue2, angular, react, nuxt, next, sveltekit)»: маркетплейс с общим OpenAPI-контрактом, общей PostgreSQL и MinIO, панелью управления процессами и фабрикой автономных экстракт-репо. Тир dev-standard: T2. Ключевые принципы: контракт — источник правды; активен один бекенд; явные `pnpm doctor/setup/start` без postinstall-магии; целевая платформа WSL2/Linux/macOS (Windows — только через WSL2); везде TypeScript на Node-стороне. Состояние: фазы 1–4 готовы (полный E2E-матрица 2×7 зелёная), фаза 5 «фабрика и витрина» — в работе (осталось видео и публикация — автор).
 
 ## Окружение (проверка перед работой)
 
@@ -20,15 +20,19 @@
 | NestJS-бекенд (:3000) | `cd backend/nestjs && pnpm build && node dist/main.js` |
 | Линт / типы (корень) | `pnpm lint` / `pnpm typecheck` |
 | Панель управления (:5555) | `pnpm start` (tsx scripts/panel/manager.ts; проверено, сессия 02) |
-| E2E Playwright | `pnpm --dir packages/e2e test` (channel:chrome; E2E_FRONT_URL) — 2/2 quasar×laravel |
+| E2E Playwright | `pnpm --dir packages/e2e test` (channel:chrome; E2E_FRONT_URL; через pw-run.mjs — кэш в репу, не в temp) |
+| E2E матрица 2×7 | `pnpm e2e:matrix` (поднимает бекенды по очереди + фронты, db:reset на пару; `--back=`/`--pairs=`) — 14/14 + сквозной кейс |
+| Полный локальный прогон | `pnpm check:all` (spectral + юниты + conformance + E2E живой пары) |
 | Мусор тестов в temp ОС | `node scripts/check-temp.mjs` (`--clean` — удалить найденное; следы проекта в %TEMP% = красный) |
+| Матричный тест фабрики | `node scripts/test-extracts.mjs` (14 экстрактов в .cache/extract-matrix, состав+git+lockfile) — 14/14 |
+| Смоук docker-образов фронтов | `node scripts/test-docker-fronts.mjs` (`--front=<имя>`; нужна живая infra:up) — 7/7 |
 | Юниты Laravel | `cd backend/laravel && vendor/bin/phpunit tests/Unit` — 7/7 |
 | Юниты NestJS | `pnpm --dir backend/nestjs test` (vitest) — 7/7 |
 | Фабрика экстрактов | `pnpm extract --front=<имя> --back=<имя> [--ci] [--dry-run]` |
 
 Особенности: **порты этой машины** — laravel на 8010 (8000 занят соседним docker-проектом `engineering-family`, см. ADR-009), nestjs 3000, панель 5555 (план), postgres 5432, s3 9002 (console 9003). Инфра живёт в WSL-docker (дистрибутив Ubuntu-24.04); при недоступности образа MinIO — s3rver-fallback на :9002 (ADR-008). Демо-аккаунты всех ролей `*@demo.dev` / пароль `password` (сидами). Схема БД меняется ТОЛЬКО общими SQL-миграциями `shared/db/migrations` (ADR-002); artisan-миграции и TypeORM synchronize запрещены. Сгенерированный SDK `packages/api-client` коммитится; перегенерация требует Java (ADR-004). Секреты — только локальные `.env`; JWT_SECRET общий у обоих бекендов (токены взаимозаменяемы, проверено). Windows-native не поддерживается — WSL2 (ADR-009).
 
-_Проверено: 2026-10-20 (сессии 02–05: infra/migrate/seed/serve/conformance/E2E/панель прогнаны на этой машине; WSL-docker стабилен с Windows-якорём)._
+_Проверено: 2026-10-25 (сессии 02–09: infra/migrate/seed/serve/conformance/E2E/панель/фабрика прогнаны на этой машине; E2E-матрица 2×7 = 14/14 пар зелёные + сквозной кейс; docker-образы фронтов 7/7; WSL-docker с Windows-якорём, но циклится при простое — e2e:matrix сам поднимает инфру)._
 
 _Таблица — канон: любой тест/скрипт проверки, существующий в репе, обязан быть здесь.
 Нашёл скрипт, которого нет в таблице, — это док-долг: внеси. Пометку «Проверено»
