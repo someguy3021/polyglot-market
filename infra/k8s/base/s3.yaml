@@ -22,7 +22,7 @@ spec:
       containers:
         - name: s3
           image: localhost:5001/pm-s3rver:k8s
-          imagePullPolicy: IfNotPresent # локальная сборка в локальном registry (ADR-012)
+          imagePullPolicy: Always # реестр локальный — проверка тега дёшево, зато up всегда подхватывает пересборку (ADR-012)
           env:
             - name: S3_ACCESS_KEY
               valueFrom:

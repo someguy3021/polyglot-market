@@ -27,7 +27,7 @@ spec:
       containers:
         - name: nestjs
           image: localhost:5001/infra-nestjs:k8s
-          imagePullPolicy: IfNotPresent # локальная сборка в локальном registry (ADR-012)
+          imagePullPolicy: Always # реестр локальный — проверка тега дёшево, зато up всегда подхватывает пересборку (ADR-012)
           env:
             - name: DB_HOST
               value: postgres

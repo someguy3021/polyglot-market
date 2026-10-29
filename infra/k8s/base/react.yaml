@@ -20,7 +20,7 @@ spec:
       containers:
         - name: react
           image: localhost:5001/infra-react:k8s
-          imagePullPolicy: IfNotPresent # локальная сборка в локальном registry (ADR-012)
+          imagePullPolicy: Always # реестр локальный — проверка тега дёшево, зато up всегда подхватывает пересборку (ADR-012)
           env:
             - name: API_URL
               value: http://127.0.0.1:8080/api

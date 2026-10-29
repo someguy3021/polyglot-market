@@ -1,11 +1,44 @@
-# Маршрутизация стенда (фича 18): /api/* → NestJS со срезом префикса
-# (Middleware strip-api, контракт не знает про /api), остальное → SPA.
+# Маршрутизация стенда (фича 18/6.2): два Ingress, у каждого свой middleware —
+# annotation Traefik вешает middleware на ВСЕ роутеры Ingress, поэтому compose
+# strip-api+strip-laravel в одном Ingress ломал бы префиксы (срез /api оставлял бы
+# /laravel/...). Приоритет по длине правила: /api/laravel длиннее /api — Traefik
+# выбирает сам, ресурсы можно не сортировать.
 # Конфликт SPA-маршрутов с префиксами контракта (/cart, /orders, /admin/*)
-# исключён именно префиксом /api — поэтому один ingress, один origin.
+# исключён префиксом /api — контракт не знает про /api, срезаем на входе.
+# Демонстрация ADR-006: /api/laravel/* → Laravel, /api/* → NestJS, одна БД.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: polyglot
+  namespace: polyglot
+  labels:
+    app.kubernetes.io/part-of: polyglot-market
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: polyglot-strip-laravel@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - http:
+        paths:
+          - path: /api/laravel
+            pathType: Prefix
+            backend:
+              service:
+                name: laravel
+                port:
+                  number: 8000
+          - path: / # strip-laravel здесь no-op: префикс /api/laravel не совпадает
+            pathType: Prefix
+            backend:
+              service:
+                name: react
+                port:
+                  number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: polyglot-api
   namespace: polyglot
   labels:
     app.kubernetes.io/part-of: polyglot-market
@@ -23,10 +56,3 @@ spec:
                 name: nestjs
                 port:
                   number: 3000
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: react
-                port:
-                  number: 80

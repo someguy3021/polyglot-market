@@ -18,7 +18,9 @@ export const config = {
     accessKey: process.env.S3_ACCESS_KEY ?? "minioadmin",
     secretKey: process.env.S3_SECRET_KEY ?? "minioadmin",
   },
-  jwtSecret: process.env.JWT_SECRET ?? "change-me-local-dev-secret",
+  // Тот же канонический дев-секрет, что у обоих бекендов по дефолту ( interchangeability
+  // токенов — AGENTS.md): короткий секрет ломает HS256 в Laravel (нужно ≥256 бит, session 10).
+  jwtSecret: process.env.JWT_SECRET ?? "dev-only-secret-change-me-0123456789-abcdef-secret-change-me",
   maxUploadMb: Number(process.env.MAX_UPLOAD_MB ?? 5),
   wslDistro: process.env.PM_WSL_DISTRO ?? "",
 };

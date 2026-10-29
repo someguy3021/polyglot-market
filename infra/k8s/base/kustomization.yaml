@@ -9,5 +9,7 @@ resources:
   - postgres.yaml
   - s3.yaml
   - nestjs.yaml
+  - laravel.yaml
   - react.yaml
+  - hpa.yaml
   - ingress.yaml

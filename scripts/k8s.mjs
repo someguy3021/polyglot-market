@@ -17,6 +17,7 @@ const NS = "polyglot";
 const REGISTRY = "localhost:5001";
 const KIND_VERSION = process.env.KIND_VERSION ?? "v0.26.0";
 const KUBECTL_VERSION = process.env.KUBECTL_VERSION ?? "v1.32.0";
+const K6_VERSION = process.env.K6_VERSION ?? "v0.57.0";
 const K8S_DIR = join(ROOT, "infra", "k8s");
 const infraDir = join(ROOT, ".k8s");
 mkdirSync(infraDir, { recursive: true });
@@ -29,8 +30,12 @@ const FORWARDED_PORTS = [8080, 55432, 59002];
 const IMAGES = [
   { local: "infra-nestjs:latest", remote: "infra-nestjs:k8s", dockerfile: "backend/nestjs/Dockerfile" },
   { local: "infra-react:latest", remote: "infra-react:k8s", dockerfile: "frontend/react/Dockerfile" },
+  { local: "infra-laravel:latest", remote: "infra-laravel:k8s", dockerfile: "backend/laravel/Dockerfile" },
   { local: "pm-s3rver:local", remote: "pm-s3rver:k8s", dockerfile: "infra/k8s/s3-dev.Dockerfile" },
   { local: "postgres:17-alpine", remote: "postgres:k8s" },
+  // источник метрик для HPA (6.2): registry.k8s.io на этой машине досягаем, но в кластер
+  // образ всё равно идёт через локальный registry (единый путь с остальными, ADR-012)
+  { local: "registry.k8s.io/metrics-server/metrics-server:v0.7.2", remote: "metrics-server:k8s" },
 ];
 
 if (cmd === "up") {
@@ -83,7 +88,9 @@ async function up() {
   loadImages(distro);
   applyManifests(distro); // создаёт и namespace — секрет только после него
   applySecret(distro);
+  restartDeployments(distro); // образы пересобраны под тем же тегом — поды должны перетянуть свежие
   waitRollouts(distro);
+  sh(distro, "sleep 5", { capture: true }); // осадка: Traefik'y нужно время пересобрать эндпоинты после рестарта
   for (const port of FORWARDED_PORTS) {
     await ensureForward(port);
   }
@@ -155,6 +162,14 @@ function ensureTools(distro) {
     console.log(`k8s: ставлю kubectl ${KUBECTL_VERSION} в ~/.local/bin дистрибутива...`);
     must(distro, `mkdir -p "$HOME/.local/bin" && curl -fsSL -o "$HOME/.local/bin/kubectl" "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && chmod +x "$HOME/.local/bin/kubectl"`, "скачивание kubectl");
   }
+  if (sh(distro, "command -v k6 >/dev/null 2>&1", { capture: true }).status !== 0) {
+    console.log(`k8s: ставлю k6 ${K6_VERSION} в ~/.local/bin дистрибутива (нагрузочный прогон 6.2)...`);
+    must(
+      distro,
+      `mkdir -p "$HOME/.local/bin" && curl -fsSL "https://github.com/grafana/k6/releases/download/${K6_VERSION}/k6-${K6_VERSION}-linux-amd64.tar.gz" | tar -xzO "k6-${K6_VERSION}-linux-amd64/k6" > "$HOME/.local/bin/k6" && chmod +x "$HOME/.local/bin/k6"`,
+      "скачивание k6",
+    );
+  }
   console.log(`k8s: ${must(distro, "kind version", "kind version").split("\n")[0]}, kubectl ${(must(distro, "kubectl version --client=true", "kubectl version").match(/v[\d.]+/) ?? ["?"])[0]}`);
 }
 
@@ -176,9 +191,11 @@ function loadImages(distro) {
     console.log(`k8s: собираю ${img.local}...`);
     must(distro, `docker build -f "${toWslPath(join(ROOT, img.dockerfile))}" -t "${img.local}" "${toWslPath(ROOT)}"`, `docker build ${img.local}`, { stdio: "inherit" });
   }
-  const postgres = IMAGES.find((i) => i.local === "postgres:17-alpine");
-  if (sh(distro, `docker image inspect ${postgres.local}`, { capture: true }).status !== 0) {
-    must(distro, `docker pull ${postgres.local}`, "docker pull postgres");
+  // образы без Dockerfile — готовые с реестров: докачать, если локально нет
+  for (const img of IMAGES.filter((i) => !i.dockerfile)) {
+    if (sh(distro, `docker image inspect ${img.local}`, { capture: true }).status !== 0) {
+      must(distro, `docker pull ${img.local}`, `docker pull ${img.local}`);
+    }
   }
   console.log(`k8s: пушу образы в локальный registry (${REGISTRY})...`);
   for (const img of IMAGES) {
@@ -214,11 +231,19 @@ function applySecret(distro) {
 }
 
 function applyManifests(distro) {
-  console.log("k8s: применяю манифесты (CRD → kustomize)...");
+  console.log("k8s: применяю манифесты (CRD → third-party → kustomize)...");
   must(distro, `kubectl apply -f "${toWslPath(join(K8S_DIR, "crds"))}"`, "apply CRD");
   // CRD нужно время, чтобы зарегистрироваться в API до Middleware из base.
   sh(distro, "sleep 3", { capture: true });
+  must(distro, `kubectl apply -f "${toWslPath(join(K8S_DIR, "third-party"))}"`, "apply third-party (metrics-server)");
   must(distro, `kubectl apply -k "${toWslPath(join(K8S_DIR, "base"))}"`, "apply base");
+}
+
+function restartDeployments(distro) {
+  // imagePullPolicy: Always делает рестарт достаточным: поды перекачают пересобранные
+  // образы из локального registry. Без этого up на живом кластере молча держал бы старый код.
+  sh(distro, `kubectl -n ${NS} rollout restart deploy --all`, { capture: true });
+  sh(distro, "sleep 2", { capture: true });
 }
 
 function waitRollouts(distro) {
@@ -249,7 +274,8 @@ function runDb() {
 
 async function smoke() {
   const checks = [
-    ["API через ingress (срез /api)", "http://127.0.0.1:8080/api/health", (b) => b.status === "ok"],
+    ["API через ingress (срез /api)", "http://127.0.0.1:8080/api/health", (b) => b.status === "ok" && b.service === "nestjs"],
+    ["laravel через ingress (ADR-006)", "http://127.0.0.1:8080/api/laravel/health", (b) => b.status === "ok" && b.service === "laravel"],
     ["каталог через ingress", "http://127.0.0.1:8080/api/products", (b) => Array.isArray(b?.data) && b.data.length > 0],
     ["SPA через ingress", "http://127.0.0.1:8080/", (b) => b.includes("<div id=")],
   ];
