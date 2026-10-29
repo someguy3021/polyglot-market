@@ -124,10 +124,10 @@ async function status() {
     console.log(`forward: 127.0.0.1:${port} — ${ok ? "доступен" : "НЕ доступен"}`);
   }));
   try {
-    const res = await fetch("http://127.0.0.1:8080/health");
+    const res = await fetch("http://127.0.0.1:8080/api/health");
     console.log(`health: HTTP ${res.status} ${JSON.stringify(await res.json())}`);
   } catch {
-    console.log("health: http://127.0.0.1:8080/health не отвечает");
+    console.log("health: http://127.0.0.1:8080/api/health не отвечает");
   }
 }
 
