@@ -1,7 +1,7 @@
 # Сессия 10 (2026-10-29): фаза 6.1 — k8s-стенд (kind в WSL2, ingress, пробы)
 
 > **Суть:** открыт production-grade слой: стек (postgres, s3rver, NestJS, react) в kind-кластере за Traefik-ingress с пробами; `pnpm k8s:up/down/status`; conformance 17/17 сквозь ingress; ADR-012 (kind вместо k3d — ghcr.io заблокирован).
-> **Коммиты:** c613fbe — feat(k8s): стенд kind в WSL2 (код, манифесты, ADR-012, фича 18, roadmap phase-6, AGENTS.md); 077ecb3 — docs: лог сессии + факты журнала; e5f187d — fix(k8s): k8s:status health-чек через /api/health.
+> **Коммиты:** c613fbe — feat(k8s): стенд kind в WSL2; 077ecb3/e5f187d/ed45094 — docs+fix; 05d0885 — feat(k8s): 6.2 оба бекенда за ingress + HPA/k6.
 > **Файлы:** 22 changed, +1289/−11 (c613fbe)
 
 ## Что сделано
@@ -47,3 +47,27 @@
 ## Итог
 
 - Состояние: стенд поднят и зелёный (`pnpm k8s:up` идемпотентен); smoke 3/3; conformance 17/17 через ingress; юниты NestJS 7/7; lint чист; typecheck красный по ЧУЖОЙ причине (conformance/ajv — док-долг).
+
+## Дополнение 1 (2026-10-29, вечер): 6.2 — оба бекенда за ingress + HPA/k6
+
+### Что сделано
+
+- **Laravel в кластере** (фича 03): `infra/k8s/base/laravel.yaml` (Deployment+Service :8000, пробы /health) + образ `infra-laravel:k8s` через локальный registry. **ADR-006 живьём**: `/api` → NestJS, `/api/laravel` → Laravel — `/api/health` отдаёт `service:nestjs`, `/api/laravel/health` — `service:laravel`; **conformance 17/17 через КАЖДЫЙ** (`CONFORMANCE_BASE_URL=http://127.0.0.1:8080/api/laravel`).
+- Ingress разделён на ДВА ресурса: annotation Traefik вешает middleware на все роутеры Ingress, compose strip-api+strip-laravel в одном Ingress ломал префиксы (срез `/api` оставлял `/laravel/...`). Внутри — Traefik сам выбирает по длине правила (/api/laravel длиннее /api).
+- **HPA + k6**: metrics-server v0.7.2 (registry.k8s.io на машине ДОСТУПЕН — на закуску к ADR-008-карте реестров; манифест с патчами в `infra/k8s/third-party/`, образ через локальный registry, `--kubelet-insecure-tls` для kind); HPA nestjs 1→5 и laravel 1→3 (CPU 60%); `pnpm k8s:load` (scripts/k8s-load.mjs + infra/k8s/load/catalog.js): таймлайн реплик + CPU подов, сводка k6.
+- **Прогон 6.2**: nestjs **1→5 реплик к t=46с** (CPU 190%/60% на пике), 25 349 запросов, **0 отказов**, 210 rps, p95 84мс; laravel честно остался 1/1 (зонд 2 VU не дожимает до таргета — HPA не масштабирует без нужды).
+- Smoke стенда стал 4/4: добавлен чек `/api/laravel/health` (service:laravel).
+
+### Грабли 6.2 и как чинились
+
+1. `docker build` laravel: `pg_config not found` — в php:8.3-cli-alpine нет libpq-dev (предбаг Dockerfile — его docker-сборку раньше не гоняли). Фикс: `apk add --virtual .build-deps postgresql-dev` + после `apk del` вернуть **postgresql-libs** (без них .so не грузится и composer не видит ext-pdo_pgsql).
+2. Laravel в поде: `bootstrap/cache directory must be present and writable` — каталога нет в репе (gitignore). Фикс: mkdir в Dockerfile (+storage/framework/*).
+3. `/api/laravel/products` → 500 после 13с: AWS SDK без кредов лез в EC2 metadata 169.254.169.254 и висел. Фикс: S3_* env в деплоймент + патч `ProductImage::publicUrl` (S3_URL_BASE — симметрично nestjs, URL браузера через :59002).
+4. Login 401 на laravel: `Key provided is shorter than 256 bits (208)` — дефолт config.mjs `change-me-local-dev-secret` (26 симв.) короче требования HS256 (32 байта), а у бекендов дефолт длиннее — латентная несостыковка. Фикс: config.mjs дефолт = канонический дев-секрет (как у бекендов).
+5. Секрет обновлён, а под держал старый env до ручного рестарта — гонка apply-секрета и рестарта; в `k8s:up` рестарт деплойментов уже после apply, но наблюдение зафиксировано.
+6. `imagePullPolicy: IfNotPresent` не подхватывал пересобранные образы под тем же тегом (спека не менялась — рестарта не было). Фикс: **Always** на приложениях + `rollout restart deploy --all` в k8s:up; перед smoke — пауза 5с (эндпоинты Traefik).
+7. Первый k6-прогон: 40 VUs наполовину в laravel → artisan serve (однопоточный dev-сервер) дал очередь 16с и 38% отказов (exit 99 по порогу 5%). Сценарий переписан честно: груз на nestjs (HPA-цель), laravel — зонд 2 VU; k8s:load теперь не падает молча, а печатает таймлайн и сводку до сообщения об ошибке.
+
+### Итог дополнения
+
+- `pnpm k8s:up` — 6 деплойментов + 2 HPA + metrics-server, smoke 4/4; conformance 17/17 × 2 бекенда; `pnpm k8s:load` — масштабирование 1→5 с нулём отказов. Остались 6.3 (наблюдаемость) и 6.4 (CI-kind).
