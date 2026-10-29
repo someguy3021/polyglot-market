@@ -1,7 +1,7 @@
 # Сессия 10 (2026-10-29): фаза 6.1 — k8s-стенд (kind в WSL2, ingress, пробы)
 
 > **Суть:** открыт production-grade слой: стек (postgres, s3rver, NestJS, react) в kind-кластере за Traefik-ingress с пробами; `pnpm k8s:up/down/status`; conformance 17/17 сквозь ingress; ADR-012 (kind вместо k3d — ghcr.io заблокирован).
-> **Коммиты:** c613fbe — feat(k8s): стенд kind в WSL2; 077ecb3/e5f187d/ed45094 — docs+fix; 05d0885 — feat(k8s): 6.2 оба бекенда за ingress + HPA/k6.
+> **Коммиты:** c613fbe — feat(k8s): стенд kind в WSL2; 077ecb3/e5f187d/ed45094 — docs+fix; 05d0885 — feat(k8s): 6.2 оба бекенда за ingress + HPA/k6; 86a4a68 — feat(k8s): 6.3+6.4 наблюдаемость и CI, фаза 6 закрыта.
 > **Файлы:** 22 changed, +1289/−11 (c613fbe)
 
 ## Что сделано
