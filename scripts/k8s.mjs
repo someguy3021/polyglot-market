@@ -1,15 +1,18 @@
 // pnpm k8s:up|down|status — k8s-стенд витрины (фича 18, ADR-012).
-// kind-кластер «polyglot» в том же WSL2-docker, что и вся инфра (ADR-009).
-// kind и kubectl скачиваются в ~/.local/bin дистрибутива при отсутствии (пин версий).
-// Образы приложений собираются локально и загружаются в кластер kind load —
+// kind-кластер «polyglot»: docker в WSL2 (win32, ADR-009) или нативно
+// (linux/darwin — CI-раннеры 6.4, mac/linux-разработка).
+// kind, kubectl и k6 скачиваются в ~/.local/bin при отсутствии (пин версий).
+// Образы приложений собираются локально и пушатся в локальный registry —
 // реестр машины ограничен (ADR-008), пуллов образов приложений нет.
-// Маршруты после подъёма: http://localhost:8080 (SPA + /api → NestJS),
-// 127.0.0.1:55432 (postgres, миграции/сиды с хоста), 127.0.0.1:59002 (S3).
-import { spawnSync, spawn, execSync } from "node:child_process";
+// Маршруты после подъёма: http://localhost:8080 (SPA + /api → NestJS,
+// /api/laravel → Laravel), 127.0.0.1:55432 (postgres), 127.0.0.1:59002 (S3),
+// http://localhost:8180 (Grafana).
+import { execSync, spawnSync, spawn } from "node:child_process";
 import { createConnection } from "node:net";
 import { existsSync, openSync, readFileSync, unlinkSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { dockerRunner, toWslPath, keepWslAlive, stopWslAlive } from "./lib/docker.mjs";
+import { keepWslAlive, stopWslAlive } from "./lib/docker.mjs";
+import { k8sRuntime, sh, must, hostPath, toolPlatform } from "./lib/k8s-runtime.mjs";
 import { config, ROOT } from "./lib/config.mjs";
 
 const CLUSTER = "polyglot";
@@ -23,19 +26,19 @@ const infraDir = join(ROOT, ".k8s");
 mkdirSync(infraDir, { recursive: true });
 
 const cmd = process.argv[2] ?? "status";
-// хост-порты стенда, которые должны быть доступны с Windows как 127.0.0.1:<порт>
+// хост-порты стенда, которые должны быть доступны как 127.0.0.1:<порт>
 const FORWARDED_PORTS = [8080, 55432, 59002];
 
-// образы стенда: локальный тег (в docker WSL) → тег в локальном registry (в манифестах)
+// образы стенда: локальный тег (в docker среды) → тег в локальном registry (в манифестах)
 const IMAGES = [
   { local: "infra-nestjs:latest", remote: "infra-nestjs:k8s", dockerfile: "backend/nestjs/Dockerfile" },
   { local: "infra-react:latest", remote: "infra-react:k8s", dockerfile: "frontend/react/Dockerfile" },
   { local: "infra-laravel:latest", remote: "infra-laravel:k8s", dockerfile: "backend/laravel/Dockerfile" },
   { local: "pm-s3rver:local", remote: "pm-s3rver:k8s", dockerfile: "infra/k8s/s3-dev.Dockerfile" },
   { local: "postgres:17-alpine", remote: "postgres:k8s" },
-  // источник метрик для HPA (6.2): registry.k8s.io на этой машине досягаем, но в кластер
-  // образ всё равно идёт через локальный registry (единый путь с остальными, ADR-012)
   { local: "registry.k8s.io/metrics-server/metrics-server:v0.7.2", remote: "metrics-server:k8s" },
+  { local: "registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0", remote: "kube-state-metrics:k8s" },
+  { local: "docker.io/library/traefik:v3.3", remote: "traefik:k8s" }, // флей auth.docker.io прибил кластерный пулл (session 10) — в кластер только через локальный registry
 ];
 
 if (cmd === "up") {
@@ -49,83 +52,60 @@ if (cmd === "up") {
   process.exit(1);
 }
 
-// --- Обёртки над WSL (kind/kubectl живут внутри дистрибутива, ~/.local/bin) ---
-
-function sh(distro, script, { stdio = "inherit", capture = false } = {}) {
-  const r = spawnSync(
-    "wsl.exe",
-    ["-d", distro, "-e", "sh", "-c", `export PATH="$HOME/.local/bin:$PATH"; ${script}`],
-    { stdio: capture ? ["ignore", "pipe", "pipe"] : stdio, windowsHide: true, encoding: "utf8" },
-  );
-  return { status: r.status, out: `${r.stdout ?? ""}\n${r.stderr ?? ""}`.replace(/\0/g, "").trim() };
-}
-
-function must(distro, script, what, { stdio } = {}) {
-  const r = sh(distro, script, { capture: !stdio, stdio });
-  if (r.status !== 0) {
-    console.error(r.out);
-    throw new Error(`${what} — код выхода ${r.status}`);
-  }
-  return r.out;
-}
-
 async function up() {
-  const runner = dockerRunner();
+  const runner = k8sRuntime();
   if (!runner) {
     console.error("docker недоступен — запустите `pnpm doctor`");
     process.exit(1);
   }
-  if (runner.kind !== "wsl") {
-    console.error("нативный docker: поставьте kind и kubectl сами (целевая платформа — WSL2, ADR-009)");
+  if (runner.kind === "unsupported") {
+    console.error("нативный docker на Windows не поддерживается — целевая платформа WSL2 (ADR-009)");
     process.exit(1);
   }
-  const distro = runner.distro;
-  keepWslAlive(distro);
+  if (runner.kind === "wsl") keepWslAlive(runner.distro);
 
-  console.log(`k8s: дистрибутив ${distro}, docker ${dockerVersion(runner)} — ok`);
-  ensureTools(distro);
-  ensureCluster(distro);
-  loadImages(distro);
-  applyManifests(distro); // создаёт и namespace — секрет только после него
-  applySecret(distro);
-  restartDeployments(distro); // образы пересобраны под тем же тегом — поды должны перетянуть свежие
-  waitRollouts(distro);
-  sh(distro, "sleep 5", { capture: true }); // осадка: Traefik'y нужно время пересобрать эндпоинты после рестарта
+  ensureTools(runner);
+  ensureCluster(runner);
+  loadImages(runner);
+  applyManifests(runner); // создаёт и namespace — секрет только после него
+  applySecret(runner);
+  restartDeployments(runner); // образы пересобраны под тем же тегом — поды должны перетянуть свежие
+  waitRollouts(runner);
+  sh(runner, "sleep 5"); // осадка: Traefik'y нужно время пересобрать эндпоинты после рестарта
   for (const port of FORWARDED_PORTS) {
-    await ensureForward(port);
+    await ensureForward(runner, port);
   }
   runDb();
   await smoke();
   console.log("\nk8s: стенд готов.");
-  console.log("  витрина:  http://localhost:8080  (SPA + /api → NestJS через Traefik)");
+  console.log("  витрина:  http://localhost:8080  (SPA + /api → NestJS, /api/laravel → Laravel)");
+  console.log("  grafana:  http://localhost:8180  (дашборд «Polyglot stand», анонимный просмотр)");
   console.log("  postgres: 127.0.0.1:55432  (миграции/сиды с хоста)");
   console.log("  S3:       127.0.0.1:59002  (s3rver, сид-картинки)");
-  console.log("  статус:   pnpm k8s:status · стоп: pnpm k8s:down");
+  console.log("  статус:   pnpm k8s:status · нагрузка: pnpm k8s:load · стоп: pnpm k8s:down");
 }
 
 async function down() {
-  const runner = dockerRunner();
+  const runner = k8sRuntime();
   for (const port of FORWARDED_PORTS) stopBridge(port);
-  if (runner?.kind === "wsl") {
-    sh(runner.distro, `kind delete cluster --name ${CLUSTER} 2>/dev/null || true`);
-  } else if (runner) {
-    spawnSync("kind", ["delete", "cluster", "--name", CLUSTER], { stdio: "inherit", windowsHide: true });
+  if (runner && runner.kind !== "unsupported") {
+    sh(runner, `kind delete cluster --name ${CLUSTER} 2>/dev/null || true`);
   }
   stopWslAlive();
   console.log("k8s: кластер удалён (данные БД/S3 стенда стёрты — это демо-стенд).");
 }
 
 async function status() {
-  const runner = dockerRunner();
-  if (!runner || runner.kind !== "wsl") {
-    console.log("k8s: docker/WSL недоступны — стенд не поднять (см. pnpm doctor)");
+  const runner = k8sRuntime();
+  if (!runner || runner.kind === "unsupported") {
+    console.log("k8s: docker недоступен — стенд не поднять (см. pnpm doctor)");
     return;
   }
-  const clusters = sh(runner.distro, "kind get clusters", { capture: true }).out;
+  const clusters = sh(runner, "kind get clusters", { capture: true }).out;
   console.log(`кластеры kind: ${clusters || "нет"}`);
   if (!clusters.split("\n").includes(CLUSTER)) return;
-  console.log(sh(runner.distro, `kubectl -n ${NS} get pods -o wide`, { capture: true }).out);
-  console.log(sh(runner.distro, `kubectl -n ${NS} get services,ingress`, { capture: true }).out);
+  console.log(sh(runner, `kubectl -n ${NS} get pods -o wide`, { capture: true }).out);
+  console.log(sh(runner, `kubectl -n ${NS} get services,ingress,hpa`, { capture: true }).out);
   await Promise.all(FORWARDED_PORTS.map(async (port) => {
     const ok = await portOpen(port);
     console.log(`forward: 127.0.0.1:${port} — ${ok ? "доступен" : "НЕ доступен"}`);
@@ -140,85 +120,77 @@ async function status() {
 
 // --- Шаги up ---
 
-function dockerVersion(runner) {
-  try {
-    const r = spawnSync(
-      runner.kind === "wsl" ? "wsl.exe" : "docker",
-      runner.kind === "wsl" ? ["-d", runner.distro, "-e", "docker", "version", "--format", "{{.Server.Version}}"] : ["version", "--format", "{{.Server.Version}}"],
-      { encoding: "utf8", windowsHide: true },
-    );
-    return `${r.stdout}`.replace(/\0/g, "").trim() || "?";
-  } catch {
-    return "?";
+function ensureTools(runner) {
+  const platform = toolPlatform(runner);
+  if (!platform) {
+    console.error(`тулзы k8s не ставятся на ${process.platform}/${process.arch} — поставьте kind/kubectl сами`);
+    process.exit(1);
   }
-}
-
-function ensureTools(distro) {
-  if (sh(distro, "command -v kind >/dev/null 2>&1", { capture: true }).status !== 0) {
-    console.log(`k8s: ставлю kind ${KIND_VERSION} в ~/.local/bin дистрибутива...`);
-    must(distro, `mkdir -p "$HOME/.local/bin" && curl -fsSL -o "$HOME/.local/bin/kind" "https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-linux-amd64" && chmod +x "$HOME/.local/bin/kind"`, "скачивание kind");
+  if (sh(runner, "command -v kind >/dev/null 2>&1", { capture: true }).status !== 0) {
+    console.log(`k8s: ставлю kind ${KIND_VERSION} в ~/.local/bin...`);
+    must(runner, `mkdir -p "$HOME/.local/bin" && curl -fsSL -o "$HOME/.local/bin/kind" "https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-${platform}" && chmod +x "$HOME/.local/bin/kind"`, "скачивание kind");
   }
-  if (sh(distro, "command -v kubectl >/dev/null 2>&1", { capture: true }).status !== 0) {
-    console.log(`k8s: ставлю kubectl ${KUBECTL_VERSION} в ~/.local/bin дистрибутива...`);
-    must(distro, `mkdir -p "$HOME/.local/bin" && curl -fsSL -o "$HOME/.local/bin/kubectl" "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && chmod +x "$HOME/.local/bin/kubectl"`, "скачивание kubectl");
+  if (sh(runner, "command -v kubectl >/dev/null 2>&1", { capture: true }).status !== 0) {
+    console.log(`k8s: ставлю kubectl ${KUBECTL_VERSION} в ~/.local/bin...`);
+    must(runner, `mkdir -p "$HOME/.local/bin" && curl -fsSL -o "$HOME/.local/bin/kubectl" "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/${platform}/kubectl" && chmod +x "$HOME/.local/bin/kubectl"`, "скачивание kubectl");
   }
-  if (sh(distro, "command -v k6 >/dev/null 2>&1", { capture: true }).status !== 0) {
-    console.log(`k8s: ставлю k6 ${K6_VERSION} в ~/.local/bin дистрибутива (нагрузочный прогон 6.2)...`);
+  if (sh(runner, "command -v k6 >/dev/null 2>&1", { capture: true }).status !== 0) {
+    console.log(`k8s: ставлю k6 ${K6_VERSION} в ~/.local/bin (нагрузочный прогон 6.2)...`);
     must(
-      distro,
-      `mkdir -p "$HOME/.local/bin" && curl -fsSL "https://github.com/grafana/k6/releases/download/${K6_VERSION}/k6-${K6_VERSION}-linux-amd64.tar.gz" | tar -xzO "k6-${K6_VERSION}-linux-amd64/k6" > "$HOME/.local/bin/k6" && chmod +x "$HOME/.local/bin/k6"`,
+      runner,
+      `mkdir -p "$HOME/.local/bin" && curl -fsSL "https://github.com/grafana/k6/releases/download/${K6_VERSION}/k6-${K6_VERSION}-${platform}.tar.gz" | tar -xzO "k6-${K6_VERSION}-${platform}/k6" > "$HOME/.local/bin/k6" && chmod +x "$HOME/.local/bin/k6"`,
       "скачивание k6",
     );
   }
-  console.log(`k8s: ${must(distro, "kind version", "kind version").split("\n")[0]}, kubectl ${(must(distro, "kubectl version --client=true", "kubectl version").match(/v[\d.]+/) ?? ["?"])[0]}`);
+  console.log(`k8s: ${must(runner, "kind version", "kind version").split("\n")[0]}, kubectl ${(must(runner, "kubectl version --client=true", "kubectl version").match(/v[\d.]+/) ?? ["?"])[0]}`);
 }
 
-function ensureCluster(distro) {
-  const clusters = must(distro, "kind get clusters", "kind get clusters");
+function ensureCluster(runner) {
+  const clusters = must(runner, "kind get clusters", "kind get clusters");
   if (clusters.split("\n").includes(CLUSTER)) {
     console.log(`k8s: кластер ${CLUSTER} уже существует.`);
     return;
   }
   console.log(`k8s: создаю кластер ${CLUSTER} (первый раз качается kindest/node ~1 ГБ — это долго)...`);
-  must(distro, `kind create cluster --config "${toWslPath(join(K8S_DIR, "kind-config.yaml"))}" --wait 300s`, "kind create cluster", { stdio: "inherit" });
+  must(runner, `kind create cluster --config "${hostPath(runner, join(K8S_DIR, "kind-config.yaml"))}" --wait 300s`, "kind create cluster", { stdio: "inherit" });
 }
 
-function loadImages(distro) {
-  ensureRegistry(distro);
+function loadImages(runner) {
+  ensureRegistry(runner);
   // Сборка всегда (кэш слоёв делает её дешёвой после первой), чтобы стенд подхватил свежий код.
   for (const img of IMAGES) {
     if (!img.dockerfile) continue;
     console.log(`k8s: собираю ${img.local}...`);
-    must(distro, `docker build -f "${toWslPath(join(ROOT, img.dockerfile))}" -t "${img.local}" "${toWslPath(ROOT)}"`, `docker build ${img.local}`, { stdio: "inherit" });
+    must(runner, `docker build -f "${hostPath(runner, join(ROOT, img.dockerfile))}" -t "${img.local}" "${hostPath(runner, ROOT)}"`, `docker build ${img.local}`, { stdio: "inherit" });
   }
   // образы без Dockerfile — готовые с реестров: докачать, если локально нет
   for (const img of IMAGES.filter((i) => !i.dockerfile)) {
-    if (sh(distro, `docker image inspect ${img.local}`, { capture: true }).status !== 0) {
-      must(distro, `docker pull ${img.local}`, `docker pull ${img.local}`);
+    if (sh(runner, `docker image inspect ${img.local}`, { capture: true }).status !== 0) {
+      must(runner, `docker pull ${img.local}`, `docker pull ${img.local}`);
     }
   }
   console.log(`k8s: пушу образы в локальный registry (${REGISTRY})...`);
   for (const img of IMAGES) {
-    must(distro, `docker tag ${img.local} ${REGISTRY}/${img.remote} && docker push -q ${REGISTRY}/${img.remote}`, `push ${REGISTRY}/${img.remote}`);
+    must(runner, `docker tag ${img.local} ${REGISTRY}/${img.remote} && docker push -q ${REGISTRY}/${img.remote}`, `push ${REGISTRY}/${img.remote}`);
   }
 }
 
-function ensureRegistry(distro) {
+function ensureRegistry(runner) {
   // kind load не работает с docker 29 + containerd image store (ctr: content digest
   // not found, session 10) — канонический рецепт kind: локальный registry в сети kind.
-  if (sh(distro, "docker inspect kind-registry", { capture: true }).status !== 0) {
+  if (sh(runner, "docker inspect kind-registry", { capture: true }).status !== 0) {
     console.log("k8s: поднимаю локальный registry (контейнер kind-registry, localhost:5001)...");
-    must(distro, "docker run -d --restart=always -p 127.0.0.1:5001:5000 --name kind-registry registry:2", "docker run registry:2", { stdio: "inherit" });
+    must(runner, "docker run -d --restart=always -p 127.0.0.1:5001:5000 --name kind-registry registry:2", "docker run registry:2", { stdio: "inherit" });
   }
   // ноды кластера тянут образы по имени kind-registry — контейнер должен быть в сети kind
-  sh(distro, "docker network connect kind kind-registry 2>/dev/null || true", { capture: true });
+  sh(runner, "docker network connect kind kind-registry 2>/dev/null || true", { capture: true });
 }
 
-function applySecret(distro) {
+function applySecret(runner) {
   // Секреты — из локального .env (принцип AGENTS.md); apply идемпотентен.
   const q = (s) => `'${String(s).replaceAll("'", `'\\''`)}'`;
   must(
-    distro,
+    runner,
     `kubectl -n ${NS} create secret generic polyglot-secrets` +
       ` --from-literal=db-password=${q(config.db.password)}` +
       ` --from-literal=jwt-secret=${q(config.jwtSecret)}` +
@@ -230,34 +202,36 @@ function applySecret(distro) {
   console.log("k8s: секрет polyglot-secrets применён (из локального .env).");
 }
 
-function applyManifests(distro) {
-  console.log("k8s: применяю манифесты (CRD → third-party → kustomize)...");
-  must(distro, `kubectl apply -f "${toWslPath(join(K8S_DIR, "crds"))}"`, "apply CRD");
+function applyManifests(runner) {
+  console.log("k8s: применяю манифесты (CRD → third-party → base → observability)...");
+  must(runner, `kubectl apply -f "${hostPath(runner, join(K8S_DIR, "crds"))}"`, "apply CRD");
   // CRD нужно время, чтобы зарегистрироваться в API до Middleware из base.
-  sh(distro, "sleep 3", { capture: true });
-  must(distro, `kubectl apply -f "${toWslPath(join(K8S_DIR, "third-party"))}"`, "apply third-party (metrics-server)");
-  must(distro, `kubectl apply -k "${toWslPath(join(K8S_DIR, "base"))}"`, "apply base");
+  sh(runner, "sleep 3", { capture: true });
+  must(runner, `kubectl apply -f "${hostPath(runner, join(K8S_DIR, "third-party"))}"`, "apply third-party (metrics-server)");
+  must(runner, `kubectl apply -k "${hostPath(runner, join(K8S_DIR, "base"))}"`, "apply base");
+  must(runner, `kubectl apply -k "${hostPath(runner, join(K8S_DIR, "observability"))}"`, "apply observability");
 }
 
-function restartDeployments(distro) {
+function restartDeployments(runner) {
   // imagePullPolicy: Always делает рестарт достаточным: поды перекачают пересобранные
   // образы из локального registry. Без этого up на живом кластере молча держал бы старый код.
-  sh(distro, `kubectl -n ${NS} rollout restart deploy --all`, { capture: true });
-  sh(distro, "sleep 2", { capture: true });
+  sh(runner, `kubectl -n ${NS} rollout restart deploy --all`, { capture: true });
+  sh(runner, "sleep 2", { capture: true });
 }
 
-function waitRollouts(distro) {
+function waitRollouts(runner) {
   console.log("k8s: жду rollout'ы деплойментов...");
-  const r = sh(distro, `kubectl -n ${NS} wait --for=condition=available deployment --all --timeout=300s`, { capture: true });
+  const r = sh(runner, `kubectl -n ${NS} wait --for=condition=available deployment --all --timeout=300s`, { capture: true });
   console.log(r.out);
   if (r.status !== 0) {
-    console.error(sh(distro, `kubectl -n ${NS} get pods`, { capture: true }).out);
+    console.error(sh(runner, `kubectl -n ${NS} get pods`, { capture: true }).out);
     throw new Error("rollout не завершился за 300с — см. статусы подов выше");
   }
 }
 
 function runDb() {
   // Миграции и сиды — штатным раннером с хоста, против кластерной БД и S3 (ADR-002).
+  // Раннер всегда на стороне Node-процесса (win32/linux/darwin), поэтому без обёртки sh.
   const env = {
     ...process.env,
     DB_HOST: "127.0.0.1",
@@ -297,17 +271,14 @@ async function smoke() {
 
 // --- Проброс портов WSL → Windows (мост при сломанном localhost-forwarding, как в infra.mjs) ---
 
-async function ensureForward(port) {
+async function ensureForward(runner, port) {
   if (await portOpen(port)) {
-    console.log(`forward: 127.0.0.1:${port} — нативный WSL-forwarding работает.`);
+    console.log(`forward: 127.0.0.1:${port} — нативный forwarding работает.`);
     return;
   }
-  const runner = dockerRunner();
-  const distro = runner?.distro ?? "";
-  if (!distro) throw new Error(`порт ${port} недоступен на Windows`);
-  const ip = (spawnSync("wsl.exe", ["-d", distro, "-e", "hostname", "-I"], { encoding: "utf8", windowsHide: true }).stdout ?? "")
-    .replace(/\0/g, "")
-    .split(/\s+/)[0] ?? "";
+  if (runner.kind !== "wsl") throw new Error(`порт ${port} недоступен на хосте`);
+  const distro = runner.distro;
+  const ip = sh({ kind: "wsl", distro }, "hostname -I", { capture: true }).out.split(/\s+/)[0] ?? "";
   if (!ip) throw new Error("не удалось определить WSL IP для моста");
   stopBridge(port);
   const log = openSync(join(infraDir, `bridge-${port}.log`), "a");

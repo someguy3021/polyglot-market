@@ -165,3 +165,41 @@ jobs:
       - name: Логи фронта при падении
         if: failure()
         run: tail -40 /tmp/front.log /tmp/laravel.log /tmp/nestjs.log 2>/dev/null || true
+
+  # k8s-стенд nightly (6.4, фаза 6): деплой стека в kind на чистом раннере —
+  # та же команда pnpm k8s:up, что у рекрутера локально (фича 18). Проверяем
+  # контракт сквозь ingress на обоих бекендах.
+  k8s-stand:
+    if: github.event_name == 'schedule'
+    name: k8s-стенд — kind, деплой, smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install
+      - name: Деплой стенда в kind (тулзы, образы и кластер скрипт поднимает сам)
+        run: pnpm k8s:up
+      - name: Grafana поднялась (наблюдаемость стенда)
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8180/api/health > /dev/null; then echo "grafana ok"; exit 0; fi
+            sleep 2
+          done
+          echo "grafana не отвечает на :8180" && exit 1
+      - name: Conformance через ingress — NestJS
+        run: CONFORMANCE_BASE_URL=http://127.0.0.1:8080/api pnpm conformance
+      - name: Conformance через ingress — Laravel
+        run: CONFORMANCE_BASE_URL=http://127.0.0.1:8080/api/laravel pnpm conformance
+      - name: Диагностика при падении
+        if: failure()
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          kubectl get nodes -o wide || true
+          kubectl -n polyglot get pods -o wide || true
+          kubectl -n polyglot get events --sort-by=.lastTimestamp 2>/dev/null | tail -30 || true

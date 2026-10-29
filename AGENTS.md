@@ -26,7 +26,7 @@
 | Мусор тестов в temp ОС | `node scripts/check-temp.mjs` (`--clean` — удалить найденное; следы проекта в %TEMP% = красный) |
 | Матричный тест фабрики | `node scripts/test-extracts.mjs` (14 экстрактов в .cache/extract-matrix, состав+git+lockfile) — 14/14 |
 | Смоук docker-образов фронтов | `node scripts/test-docker-fronts.mjs` (`--front=<имя>`; нужна живая infra:up) — 7/7 |
-| k8s-стенд (kind в WSL2, фича 18) | `pnpm k8s:up` / `pnpm k8s:down` / `pnpm k8s:status` — витрина http://localhost:8080 (SPA + /api → NestJS + /api/laravel → Laravel), postgres :55432, S3 :59002 |
+| k8s-стенд (kind, фича 18) | `pnpm k8s:up` / `pnpm k8s:down` / `pnpm k8s:status` — витрина http://localhost:8080 (SPA + /api → NestJS + /api/laravel → Laravel), Grafana http://localhost:8180, postgres :55432, S3 :59002; работает на WSL2 (win32) и нативном docker (linux/macOS) |
 | Нагрузочный прогон k8s (k6 + HPA) | `pnpm k8s:load` (после k8s:up; таймлайн реплик nestjs 1→5, laravel 1→3; 2 мин) |
 | Юниты Laravel | `cd backend/laravel && vendor/bin/phpunit tests/Unit` — 7/7 |
 | Юниты NestJS | `pnpm --dir backend/nestjs test` (vitest) — 7/7 |
@@ -34,7 +34,7 @@
 
 Особенности: **порты этой машины** — laravel на 8010 (8000 занят соседним docker-проектом `engineering-family`, см. ADR-009), nestjs 3000, панель 5555 (план), postgres 5432, s3 9002 (console 9003); k8s-стенд — витрина 8080, postgres 55432, S3 59002 (фича 18, ADR-012). Инфра живёт в WSL-docker (дистрибутив Ubuntu-24.04); при недоступности образа MinIO — s3rver-fallback на :9002 (ADR-008), в k8s-стенде S3 — s3rver-образ pm-s3rver. Реестры машины: docker.io и GitHub доступны, ghcr.io заблокирован (поэтому kind, а не k3d). Демо-аккаунты всех ролей `*@demo.dev` / пароль `password` (сидами). Схема БД меняется ТОЛЬКО общими SQL-миграциями `shared/db/migrations` (ADR-002); artisan-миграции и TypeORM synchronize запрещены. Сгенерированный SDK `packages/api-client` коммитится; перегенерация требует Java (ADR-004). Секреты — только локальные `.env`; JWT_SECRET общий у обоих бекендов (токены взаимозаменяемы, проверено). Windows-native не поддерживается — WSL2 (ADR-009).
 
-_Проверено: 2026-10-29 (сессия 10: k8s-стенд полный цикл — kind в WSL2, ingress на ОБА бекенда (/api → NestJS, /api/laravel → Laravel), пробы, HPA+metrics-server+k6 (nestjs 1→5 реплик, 25349 запросов 0 отказов); conformance 17/17 через каждый бекенд; юниты NestJS 7/7; ранее сессии 02–09: infra/migrate/seed/serve/conformance/E2E/панель/фабрика, E2E-матрица 2×7 = 14/14, docker-образы 7/7; WSL-docker с Windows-якорём, но циклится при простое — k8s:up и e2e:matrix сами поднимают инфру)._
+_Проверено: 2026-10-29 (сессия 10, фаза 6 готова целиком: k8s-стенд — kind, оба бекенда за ingress, conformance 17/17 × 2, HPA+k6 (25349 и 26360 запросов 0 отказов), наблюдаемость Prometheus/Grafana/Loki — 5 таргетов up, дашборд провижинен, Grafana на :8180; юниты NestJS 7/7; ночная kind-джоба в CI добавлена (первый ночной прогон покажет); ранее сессии 02–09: infra/migrate/seed/conformance/E2E-матрица 2×7 = 14/14, docker-образы 7/7, панель, фабрика 14/14; WSL-docker с Windows-якорём циклится при простое — k8s:up сам поднимает всё)._
 
 _Таблица — канон: любой тест/скрипт проверки, существующий в репе, обязан быть здесь.
 Нашёл скрипт, которого нет в таблице, — это док-долг: внеси. Пометку «Проверено»

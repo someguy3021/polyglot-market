@@ -1,0 +1,11 @@
+# Наблюдаемость стенда (6.3, ADR-013): bare-манифесты вместо helm/операторов —
+# тот же стиль, что и весь стенд (ADR-012): всё видно в репе, без доп. инструментов.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: polyglot
+resources:
+  - prometheus.yaml
+  - kube-state-metrics.yaml
+  - loki.yaml
+  - promtail.yaml
+  - grafana.yaml

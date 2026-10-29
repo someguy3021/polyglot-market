@@ -3,6 +3,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { JwtModule } from "@nestjs/jwt";
 import { AuthModule } from "./auth/auth.module";
 import { HealthController } from "./health.controller";
+import { MetricsController } from "./metrics/metrics.controller";
 import { ShopController } from "./cart/shop.controller";
 import { CartService } from "./cart/cart.service";
 import { CatalogService } from "./catalog/catalog.service";
@@ -74,7 +75,7 @@ import {
     }),
     AuthModule,
   ],
-  controllers: [HealthController, ShopController, OrdersController, SellerController, StaffController],
+  controllers: [HealthController, MetricsController, ShopController, OrdersController, SellerController, StaffController],
   providers: [CartService, CatalogService, OrdersService, SellerService],
 })
 export class AppModule {}

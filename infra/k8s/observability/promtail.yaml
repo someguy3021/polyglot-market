@@ -1,0 +1,117 @@
+# Promtail: DaemonSet читает логи подов из /var/log/pods узла (в kind логи
+# containerd лежат там же) и пушит в Loki. pino-логи NestJS парсятся в level
+# (50=error, 40=warn, 30=info), остальное (laravel stderr, traefik) — level=plain.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: promtail-config
+  namespace: polyglot
+  labels:
+    app: promtail
+data:
+  promtail.yml: |
+    server:
+      http_listen_port: 9080
+    positions:
+      filename: /run/promtail/positions.yaml
+    clients:
+      - url: http://loki:3100/loki/api/v1/push
+    scrape_configs:
+      - job_name: kubernetes-pods
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            target_label: app
+          - source_labels: [__meta_kubernetes_pod_container_name]
+            target_label: container
+          - source_labels: [__meta_kubernetes_pod_uid, __meta_kubernetes_pod_container_name]
+            target_label: __path__
+            separator: /
+            replacement: /var/log/pods/*$1/*.log
+        pipeline_stages:
+          - json:
+              expressions:
+                level_num: level
+                msg: msg
+          - template:
+              source: level
+              template: '{{ if eq (toString .level_num) "50" }}error{{ else if eq (toString .level_num) "40" }}warn{{ else if eq (toString .level_num) "30" }}info{{ else if .level_num }}info{{ else }}plain{{ end }}'
+          - labels:
+              level: ""
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: promtail-polyglot
+rules:
+  - apiGroups: [""]
+    resources: [pods, namespaces]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: promtail-polyglot
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: promtail-polyglot
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: polyglot
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: promtail
+  namespace: polyglot
+  labels:
+    app: promtail
+spec:
+  selector:
+    matchLabels:
+      app: promtail
+  template:
+    metadata:
+      labels:
+        app: promtail
+    spec:
+      containers:
+        - name: promtail
+          image: grafana/promtail:3.4.2
+          imagePullPolicy: IfNotPresent
+          args:
+            - -config.file=/etc/promtail/promtail.yml
+          ports:
+            - name: http
+              containerPort: 9080
+          volumeMounts:
+            - name: config
+              mountPath: /etc/promtail
+            - name: positions
+              mountPath: /run/promtail
+            - name: logs
+              mountPath: /var/log/pods
+              readOnly: true
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              memory: 192Mi
+      volumes:
+        - name: config
+          configMap:
+            name: promtail-config
+        - name: positions
+          emptyDir: {}
+        - name: logs
+          hostPath:
+            path: /var/log/pods
+            type: Directory

@@ -2,6 +2,7 @@
 // Основной груз — nestjs (цель автоскейлинга); laravel получает лёгкий зонд:
 // artisan serve — однопоточный dev-сервер, 40 VUs он не держит (перепробовано
 // в session 10: очередь 16с и 38% отказов). Это честная рамка демо, не SLA.
+/* global __ENV */
 import http from "k6/http";
 import { sleep } from "k6";
 

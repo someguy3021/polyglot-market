@@ -8,8 +8,8 @@
 
 ## Сейчас
 
-- Фаза: 6 «production-grade» [В РАБОТЕ] — 6.1–6.2 готовы (k8s-стенд, оба бекенда за ingress, HPA+k6); дальше 6.3 наблюдаемость — [phase-6-фаза-6-production-grade-k8s-наблюдаемость.md](./roadmap/phase-6-фаза-6-production-grade-k8s-наблюдаемость.md); параллельно фаза 5 ждёт видео и публикацию (автор) — [phase-5-фаза-5-фабрика-и-витрина.md](./roadmap/phase-5-фаза-5-фабрика-и-витрина.md)
-- Последняя сессия: 10 (2026-10-29) — k8s-стенд + 6.2: /api/laravel → laravel (conformance 17/17 × 2), HPA 1→5 под k6
+- Фаза: 6 «production-grade» [ГОТОВА] — k8s-стенд (kind), оба бекенда за ingress, HPA+k6, наблюдаемость Prometheus/Grafana/Loki, ночная kind-джоба в CI — [phase-6-фаза-6-production-grade-k8s-наблюдаемость.md](./roadmap/phase-6-фаза-6-production-grade-k8s-наблюдаемость.md); параллельно фаза 5 ждёт видео и публикацию (автор) — [phase-5-фаза-5-фабрика-и-витрина.md](./roadmap/phase-5-фаза-5-фабрика-и-витрина.md)
+- Последняя сессия: 10 (2026-10-29) — фаза 6 целиком: k8s-стенд + 6.2 (ADR-006 живьём, HPA 1→5) + 6.3 (Grafana :8180) + 6.4 (CI)
 - Горячее: [open-questions.md](./open-questions.md) — имя бренда (автор) и ТЗ-верификация фич 14–18
 
 ## Карта документации
@@ -53,6 +53,7 @@
 - [ADR-010](./decisions/adr-010-фабрика-экстрактов-публична-и-с-lockfile.md) — фабрика публична
 - [ADR-011](./decisions/adr-011-идемпотентность-заказов-через-idempotency-key.md) — Idempotency-Key
 - [ADR-012](./decisions/adr-012-kubernetes-стенд-локально-kind-в-wsl2-манифесты-cloud-переносимы.md) — k8s-стенд: kind в WSL2 (k3d отвергнут: ghcr.io заблокирован)
+- [adr-013-наблюдаемость-стенда-bare-манифесты-prometheus-gra.md](./decisions/adr-013-наблюдаемость-стенда-bare-манифесты-prometheus-gra.md) — стек наблюдаемости (Prometheus + Grafana + Loki/Promtail + …
 
 ### `roadmap/` — что делаем и что осталось
 

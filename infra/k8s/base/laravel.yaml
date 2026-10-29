@@ -23,6 +23,8 @@ spec:
           image: localhost:5001/infra-laravel:k8s
           imagePullPolicy: Always # реестр локальный — проверка тега дёшево, зато up всегда подхватывает пересборку (ADR-012)
           env:
+            - name: LOG_CHANNEL # логи в stderr → их собирает promtail (6.3)
+              value: stderr
             - name: DB_HOST
               value: postgres
             - name: DB_PORT

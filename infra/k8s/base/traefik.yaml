@@ -71,20 +71,29 @@ spec:
     metadata:
       labels:
         app: traefik
+      annotations:
+        prometheus.io/scrape: "true" # discovery Prometheus по аннотациям (6.3)
+        prometheus.io/port: "8082"
+        prometheus.io/path: /metrics
     spec:
       serviceAccountName: traefik
       containers:
         - name: traefik
-          image: traefik:v3.3
-          imagePullPolicy: IfNotPresent
+          image: localhost:5001/traefik:k8s # через локальный registry: прямой пулл бьётся о флей auth.docker.io (session 10)
+          imagePullPolicy: Always
           args:
             - --entrypoints.web.address=:80
+            - --entrypoints.metrics.address=:8082 # отдельный entrypoint только для /metrics
+            - --metrics.prometheus=true
+            - --metrics.prometheus.entrypoint=metrics
             - --providers.kubernetesingress=true
             - --providers.kubernetescrd=true
             - --log.level=INFO
           ports:
             - name: web
               containerPort: 80
+            - name: metrics
+              containerPort: 8082
           resources:
             requests:
               cpu: 50m

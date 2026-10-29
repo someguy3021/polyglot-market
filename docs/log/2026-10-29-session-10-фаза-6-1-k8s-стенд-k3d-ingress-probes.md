@@ -71,3 +71,25 @@
 ### Итог дополнения
 
 - `pnpm k8s:up` — 6 деплойментов + 2 HPA + metrics-server, smoke 4/4; conformance 17/17 × 2 бекенда; `pnpm k8s:load` — масштабирование 1→5 с нулём отказов. Остались 6.3 (наблюдаемость) и 6.4 (CI-kind).
+
+## Дополнение 2 (2026-10-29, ночь): 6.3 + 6.4 — наблюдаемость и CI; фаза 6 закрыта
+
+### Что сделано
+
+- **Наблюдаемость (6.3, ADR-013)**: `infra/k8s/observability/` (Kustomize) — Prometheus v3 (scrape по аннотациям `prometheus.io/*` + kubelet/cAdvisor + kube-state-metrics; RBAC c nonResourceURLs /metrics, /metrics/cadvisor), Loki 3.4 single-binary (tsdb+filesystem, PVC), Promtail DaemonSet (логи подов из /var/log/pods; pino-JSON → level), Grafana 11 (datasources + дашборд «Polyglot stand» из ConfigMap — as code), kube-state-metrics v2.13. Проверено живьём: 5 таргетов Prometheus up, Loki `/ready` = ready, дашборд провижинен, Grafana на http://localhost:8180 (NodePort 30090, анонимный просмотр).
+- **NestJS**: `prom-client` — /metrics (счётчик+латентность по шаблону маршрута, глобальный интерцептор `MetricsInterceptor`, дефолтные метрики процесса) и `pino` как LoggerService (JSON в stdout). Метрики подтвердлены запросами к Prometheus API.
+- **Проводка**: Traefik --metrics.prometheus на отдельном entrypoint :8082 (счётчики по сервисам ленивые — появляются после первого запроса через ingress); Laravel LOG_CHANNEL=stderr (логи в stdout → promtail).
+- **Переносимость k8s-скриптов**: общий раннер `scripts/lib/k8s-runtime.mjs` — WSL2 (win32) или нативный docker (linux/darwin); kind/kubectl/k6 качаются под платформу окружения исполнения (WSL → linux, нативно → хост). `pnpm k8s:up` теперь работает и на CI-раннере, и на mac/linux.
+- **CI (6.4)**: ночная джоба `k8s-stand` в .github/workflows/ci.yml (по schedule, как e2e-матрица): чистый раннер → `pnpm k8s:up` → Grafana healthcheck → conformance 17/17 через /api И через /api/laravel → диагностика подов при падении.
+- **Прогон k8s:load на новом стеке**: 26 360 запросов, 0 отказов, 219 rps, nestjs 1→5 реплик — дашборд «Реплики деплойментов» с живой историей масштабирования.
+
+### Грабли 6.3 и как чинились
+
+1. **Сеть машины флапает по хостам** (главная тема вечера): auth.docker.io → i/o timeout прибил и локальную сборку laravel (FROM-верификация), и кластерный пулл traefik:v3.3 (ImagePullBackOff). Mirrors (mirror.gcr.io, public.ecr.aws) — тоже таймауты. Решение: **все образы стенда — только через локальный registry** (traefik добавлен в IMAGES); kubelet сам дотянул traefik в открывшемся окне (ImagePullBackOff самоизлечивается), плюс фон-цикл докэшировал образ в WSL-docker. Composer-сборка laravel поймала транзиентный curl error 28 до api.github.com — сошёлся на ретрае.
+2. `toolPlatform()` брал platform хоста (win32) — а тулзы ставятся в WSL (linux): up падал «тулзы не ставятся на win32/x64». Фикс: платформа от раннера.
+3. `require()` внутри ESM k8s.mjs — переписан на import (после рефакторга).
+4. Loki/Grafana на старте выглядели «0/1 Running» — просто медленный первый бут + compactor ждёт стабилизации ring; сошлись сами, без правок.
+
+### Итог дополнения
+
+- Фаза 6 ГОТОВА целиком: 6.1 кластер+деплой, 6.2 два бекенда за ingress+HPA, 6.3 наблюдаемость, 6.4 CI. Все проверки зелёные (см. факты журнала). ТЗ фичи 18 (R1–R8) ждёт верификации автора. Ночная CI-джоба будет доказана первым ночным прогоном (синтаксис и структура повторяют проверенный e2e-matrix).

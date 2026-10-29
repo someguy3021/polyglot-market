@@ -8,6 +8,7 @@ export default [
       "**/node_modules/**",
       "**/dist/**",
       "**/vendor/**",
+      ".cache/**", // артефакты матричного теста фабрики (extract-matrix) — не исходники
       "packages/api-client/**",
       "backend/**",
       "frontend/**",
@@ -25,9 +26,11 @@ export default [
         fetch: "readonly",
         URL: "readonly",
         Buffer: "readonly",
-        setTimeout: "readonly",
-        clearTimeout: "readonly",
-        AbortController: "readonly",
+      setTimeout: "readonly",
+      clearTimeout: "readonly",
+      AbortController: "readonly",
+      AbortSignal: "readonly", // Node 17+ глобал (fetch-таймауты в скриптах)
+      structuredClone: "readonly",
       },
     },
     rules: {

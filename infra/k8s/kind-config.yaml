@@ -26,3 +26,7 @@ nodes:
         hostPort: 59002
         listenAddress: "0.0.0.0"
         protocol: TCP
+      - containerPort: 30090 # Grafana (nodePort) — http://localhost:8180 (дашборд 6.3)
+        hostPort: 8180
+        listenAddress: "0.0.0.0"
+        protocol: TCP

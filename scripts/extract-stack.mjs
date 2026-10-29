@@ -118,7 +118,7 @@ pnpm setup    # инфраструктура (Docker: postgres+minio) + мигр
 pnpm start    # запуск бекенда${needsPhp ? " (php artisan serve :8000)" : " (node dist/main.js :3000)"}
 \`\`\`
 
-${needsPhp ? "Бекенд: `cd backend/" + back + " && composer install && php artisan serve --port=8000`\n" : "Бекенд: \`cd backend/" + back + " && pnpm install && pnpm build && pnpm start\`\n"}
+${needsPhp ? "Бекенд: `cd backend/" + back + " && composer install && php artisan serve --port=8000`\n" : "Бекенд: `cd backend/" + back + " && pnpm install && pnpm build && pnpm start`\n"}
 Фронтенд: \`cd frontend/${front} && pnpm install && pnpm dev\`
 
 ## Демо-аккаунты

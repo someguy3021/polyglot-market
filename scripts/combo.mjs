@@ -94,7 +94,7 @@ function composePath() {
 }
 
 if (!existsSync(join(ROOT, ".infra", "s3-dev.pid"))) {
-  try { execFileSync("node", [join(ROOT, "scripts", "infra.mjs"), "up"], { stdio: "inherit", shell: process.platform === "win32" }); } catch {}
+  try { execFileSync("node", [join(ROOT, "scripts", "infra.mjs"), "up"], { stdio: "inherit", shell: process.platform === "win32" }); } catch { /* infra поднимется позже сама */ }
 }
 console.log(`combo: сборка и подъём ${front}(:${hostFrontPort}) × ${back}(:${hostBackPort}) + postgres + minio…`);
 dockerRun(runner, ["compose", "-f", comboWsl, "up", "-d", "--build", "--wait"], { stdio: "inherit" });

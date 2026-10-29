@@ -4,7 +4,8 @@
 import net from "node:net";
 import { writeFileSync } from "node:fs";
 
-const args = Object.fromEntries(process.argv.slice(2).reduce<string[][]>((acc, a, i, arr) => {
+// reduce без дженерика: файл .mjs — TS-синтаксис здесь валиден только для eslint, не для node
+const args = Object.fromEntries(process.argv.slice(2).reduce((acc, a, i, arr) => {
   if (a.startsWith("--")) acc.push([a.slice(2), arr[i + 1] ?? ""]);
   return acc;
 }, []));

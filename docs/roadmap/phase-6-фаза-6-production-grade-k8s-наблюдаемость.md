@@ -1,6 +1,6 @@
 # Roadmap — Фаза 6: production-grade (k8s, наблюдаемость)
 
-> **Статус:** В РАБОТЕ (6.1–6.2 готовы; 6.3–6.4 впереди) · **Обновлено:** 2026-10-29
+> **Статус:** ГОТОВА · **Обновлено:** 2026-10-29
 
 **Суть:** production-grade слой витрины: локальный Kubernetes (k3d), балансировка через ingress, наблюдаемость (метрики/логи/дашборды), кластерный CI-прогон.
 
@@ -25,12 +25,14 @@
 
 ### 6.3 — Наблюдаемость
 
-- [ ] Prometheus + Grafana + Loki в кластере (доп. профиль Kustomize)
-- [ ] /metrics на NestJS (prom-client), JSON-логи (pino), дашборды as code в репе
+- [x] Prometheus + Grafana + Loki/Promtail в кластере (bare-манифесты `infra/k8s/observability/`, ADR-013); kube-state-metrics для графика реплик
+- [x] /metrics на NestJS (prom-client: RPS + латентность + процесс), pino-JSON-логи, Laravel — stderr; Traefik-метрики на отдельном entrypoint
+- [x] Дашборд «Polyglot stand» as code (ConfigMap): RPS по сервисам, реплики, p95, CPU подов, объём логов; Grafana на http://localhost:8180
 
 ### 6.4 — CI
 
-- [ ] Ночная джоба: деплой одной пары в kind-кластер на раннере + smoke (продолжение фичи 15 «PR-быстро, матрица ночью»)
+- [x] Ночная джоба k8s-stand: чистый раннер → pnpm k8s:up (kind+деплой) → Grafana healthcheck → conformance 17/17 через оба бекенда; диагностика подов при падении
+- [x] k8s-скрипты работают нативно на linux/darwin (scripts/lib/k8s-runtime.mjs) — CI и mac-разработка без WSL
 
 ## Критерии готовности
 

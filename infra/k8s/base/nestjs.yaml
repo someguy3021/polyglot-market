@@ -17,6 +17,10 @@ spec:
     metadata:
       labels:
         app: nestjs
+      annotations:
+        prometheus.io/scrape: "true" # discovery Prometheus по аннотациям (6.3)
+        prometheus.io/port: "3000"
+        prometheus.io/path: /metrics
     spec:
       # Прод-паттерн: не стартовать приложение, пока БД не готова принимать соединения.
       initContainers:

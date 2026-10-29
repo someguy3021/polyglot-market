@@ -1,0 +1,203 @@
+# Grafana стенда: datasources (prometheus + loki) и дашборд «Polyglot stand»
+# провижинятся из ConfigMap при старте — дашборд as code, в репе (6.3).
+# Наружу — NodePort 30090 → http://localhost:8180 (kind-config.yaml), анонимный просмотр.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: polyglot
+  labels:
+    app: grafana
+data:
+  datasources.yml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        uid: prom
+        type: prometheus
+        access: proxy
+        url: http://prometheus:9090
+        isDefault: true
+      - name: Loki
+        uid: loki
+        type: loki
+        access: proxy
+        url: http://loki:3100
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: polyglot
+  labels:
+    app: grafana
+data:
+  provider.yml: |
+    apiVersion: 1
+    providers:
+      - name: polyglot
+        folder: Polyglot
+        type: file
+        options:
+          path: /var/lib/grafana/dashboards
+  stand.json: |
+    {
+      "title": "Polyglot stand",
+      "uid": "polyglot-stand",
+      "tags": ["polyglot"],
+      "timezone": "browser",
+      "refresh": "10s",
+      "time": { "from": "now-30m", "to": "now" },
+      "schemaVersion": 39,
+      "version": 1,
+      "panels": [
+        {
+          "id": 1,
+          "title": "RPS по сервисам (Traefik)",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+          "targets": [
+            { "expr": "sum by (service) (rate(traefik_service_requests_total[1m]))", "legendFormat": "{{service}}" }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Реплики деплойментов (HPA)",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+          "targets": [
+            { "expr": "kube_deployment_status_replicas{namespace=\"polyglot\", deployment=~\"nestjs|laravel|react\"}", "legendFormat": "{{deployment}}" }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "NestJS p95 латентность",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+          "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+          "targets": [
+            { "expr": "histogram_quantile(0.95, sum by (le) (rate(polyglot_http_request_duration_seconds_bucket[5m])))", "legendFormat": "p95" }
+          ]
+        },
+        {
+          "id": 4,
+          "title": "CPU подов стека",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "fieldConfig": { "defaults": { "unit": "none" }, "overrides": [] },
+          "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+          "targets": [
+            { "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"polyglot\", container!=\"\", image!=\"\"}[2m]))", "legendFormat": "{{pod}}" }
+          ]
+        },
+        {
+          "id": 5,
+          "title": "Логи стека: объём в минуту (Loki)",
+          "type": "timeseries",
+          "datasource": { "type": "loki", "uid": "loki" },
+          "gridPos": { "x": 0, "y": 16, "w": 16, "h": 8 },
+          "targets": [
+            { "expr": "sum by (app) (count_over_time({namespace=\"polyglot\"}[1m]))", "legendFormat": "{{app}}", "queryType": "range", "refId": "A" }
+          ]
+        },
+        {
+          "id": 6,
+          "title": "Живые цели Prometheus",
+          "type": "stat",
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "gridPos": { "x": 16, "y": 16, "w": 8, "h": 8 },
+          "targets": [
+            { "expr": "count(up == 1)", "legendFormat": "up" }
+          ]
+        }
+      ]
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: polyglot
+  labels:
+    app: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:11.4.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: GF_AUTH_ANONYMOUS_ENABLED # демо-стенд: просмотр без логина
+              value: "true"
+            - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+              value: Viewer
+            - name: GF_AUTH_BASIC_ENABLED
+              value: "false"
+            - name: GF_USERS_DEFAULT_THEME
+              value: dark
+          ports:
+            - name: http
+              containerPort: 3000
+          volumeMounts:
+            - name: datasources
+              mountPath: /etc/grafana/provisioning/datasources
+            - name: dashboards-provider
+              mountPath: /etc/grafana/provisioning/dashboards
+            - name: dashboards
+              mountPath: /var/lib/grafana/dashboards
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      volumes:
+        - name: datasources
+          configMap:
+            name: grafana-datasources
+        - name: dashboards-provider
+          configMap:
+            name: grafana-dashboards
+            items:
+              - key: provider.yml
+                path: provider.yml
+        - name: dashboards
+          configMap:
+            name: grafana-dashboards
+            items:
+              - key: stand.json
+                path: stand.json
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: polyglot
+  labels:
+    app: grafana
+spec:
+  type: NodePort
+  selector:
+    app: grafana
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+      nodePort: 30090
