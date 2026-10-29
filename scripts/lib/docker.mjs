@@ -26,8 +26,9 @@ export function dockerRun(runner, args, { stdio = "inherit" } = {}) {
 }
 
 export function toWslPath(p) {
+  // Прямые и обратные слэши: join() даёт обратные, import.meta.url — прямые.
   return p
-    .replace(/^([A-Za-z]):\\/, (_m, disk) => `/mnt/${disk.toLowerCase()}/`)
+    .replace(/^([A-Za-z]):[/\\]/, (_m, disk) => `/mnt/${disk.toLowerCase()}/`)
     .replaceAll("\\", "/");
 }
 

@@ -1,0 +1,94 @@
+# PostgreSQL стенда — та же роль, что в docker-compose.infra.yml (ADR-001).
+# Пароль — из Secret polyglot-secrets (создаётся скриптом k8s.mjs из локального .env).
+# NodePort 30432 проброшен на хост как 55432 (kind-config.yaml) — миграции/сиды с хоста.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pgdata
+  namespace: polyglot
+  labels:
+    app: postgres
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: polyglot
+  labels:
+    app: postgres
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate # PVC RWO — один под, без rolling-конфликта
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: localhost:5001/postgres:k8s
+          imagePullPolicy: IfNotPresent # тянется из локального registry (ADR-012)
+          env:
+            - name: POSTGRES_USER
+              value: polyglot
+            - name: POSTGRES_DB
+              value: polyglot
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: polyglot-secrets
+                  key: db-password
+          ports:
+            - name: pg
+              containerPort: 5432
+          volumeMounts:
+            - name: pgdata
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu: 100m
+              memory: 192Mi
+            limits:
+              memory: 512Mi
+          readinessProbe:
+            exec:
+              command: [pg_isready, -U, polyglot, -d, polyglot]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 24 # первый initdb занимает минуту с лишним — не убивать старт
+          livenessProbe:
+            exec:
+              command: [pg_isready, -U, polyglot, -d, polyglot]
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            failureThreshold: 6
+      volumes:
+        - name: pgdata
+          persistentVolumeClaim:
+            claimName: pgdata
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: polyglot
+  labels:
+    app: postgres
+spec:
+  type: NodePort
+  selector:
+    app: postgres
+  ports:
+    - name: pg
+      port: 5432
+      targetPort: pg
+      nodePort: 30432

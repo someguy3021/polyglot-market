@@ -1,0 +1,131 @@
+# Traefik v3 как ingress-контроллер стенда: образ с docker.io (registry.k8s.io
+# на машине не проверен, ADR-008/012). Deploiм голыми манифестами вместо helm —
+# всё видно в репе, helm не нужен. Entry point web :80, Service → nodePort 30080.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: traefik
+  namespace: polyglot
+  labels:
+    app: traefik
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: traefik-polyglot
+rules:
+  - apiGroups: [""]
+    resources: [nodes] # cluster-scope lookup: без него ingress-провайдер не синхронизируется (session 10)
+    verbs: [get, list, watch]
+  - apiGroups: [""]
+    resources: [services, endpoints, secrets]
+    verbs: [get, list, watch]
+  - apiGroups: [discovery.k8s.io]
+    resources: [endpointslices]
+    verbs: [get, list, watch]
+  - apiGroups: [networking.k8s.io]
+    resources: [ingresses, ingressclasses]
+    verbs: [get, list, watch]
+  - apiGroups: [networking.k8s.io]
+    resources: [ingresses/status]
+    verbs: [update]
+  - apiGroups: [traefik.io]
+    resources: [middlewares, middlewaretcps, ingressroutes, ingressroutetcps, ingressrouteudps, tlsoptions, tlsstores, serverstransports, serverstransporttcps, traefikservices]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: traefik-polyglot
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: traefik-polyglot
+subjects:
+  - kind: ServiceAccount
+    name: traefik
+    namespace: polyglot
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: traefik
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "true"
+spec:
+  controller: traefik.io/ingress-controller
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik
+  namespace: polyglot
+  labels:
+    app: traefik
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: traefik
+      containers:
+        - name: traefik
+          image: traefik:v3.3
+          imagePullPolicy: IfNotPresent
+          args:
+            - --entrypoints.web.address=:80
+            - --providers.kubernetesingress=true
+            - --providers.kubernetescrd=true
+            - --log.level=INFO
+          ports:
+            - name: web
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          readinessProbe:
+            tcpSocket:
+              port: web
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: web
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik
+  namespace: polyglot
+  labels:
+    app: traefik
+spec:
+  type: NodePort
+  selector:
+    app: traefik
+  ports:
+    - name: web
+      port: 80
+      targetPort: web
+      nodePort: 30080
+---
+# /api/* → NestJS со срезанным префиксом (контракт не знает про /api, фича 18).
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-api
+  namespace: polyglot
+spec:
+  stripPrefix:
+    prefixes:
+      - /api

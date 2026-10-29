@@ -1,0 +1,103 @@
+# NestJS-бекенд стенда: тот же образ, что в docker-комбо (infra-nestjs:latest,
+# Dockerfile backend/nestjs). Внутри кластера пишет в S3 через service DNS,
+# а браузерные URL картинок отдаёт через проброшенный порт (S3_URL_BASE, фича 18).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nestjs
+  namespace: polyglot
+  labels:
+    app: nestjs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nestjs
+  template:
+    metadata:
+      labels:
+        app: nestjs
+    spec:
+      # Прод-паттерн: не стартовать приложение, пока БД не готова принимать соединения.
+      initContainers:
+        - name: wait-db
+          image: localhost:5001/postgres:k8s
+          imagePullPolicy: IfNotPresent
+          command: [sh, -c, "until pg_isready -h postgres -U polyglot -d polyglot; do sleep 2; done"]
+      containers:
+        - name: nestjs
+          image: localhost:5001/infra-nestjs:k8s
+          imagePullPolicy: IfNotPresent # локальная сборка в локальном registry (ADR-012)
+          env:
+            - name: DB_HOST
+              value: postgres
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_DATABASE
+              value: polyglot
+            - name: DB_USERNAME
+              value: polyglot
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: polyglot-secrets
+                  key: db-password
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: polyglot-secrets
+                  key: jwt-secret
+            - name: PORT
+              value: "3000"
+            - name: S3_ENDPOINT
+              value: http://s3:9000 # pod → service DNS
+            - name: S3_URL_BASE # браузер → проброшенный порт (фича 18)
+              value: http://127.0.0.1:59002/products
+            - name: S3_BUCKET
+              value: products
+            - name: S3_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: polyglot-secrets
+                  key: s3-access-key
+            - name: S3_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: polyglot-secrets
+                  key: s3-secret-key
+          ports:
+            - name: http
+              containerPort: 3000
+          resources:
+            requests:
+              cpu: 100m
+              memory: 192Mi
+            limits:
+              memory: 512Mi
+          readinessProbe: # /health — эндпоинт контракта, без авторизации
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nestjs
+  namespace: polyglot
+  labels:
+    app: nestjs
+spec:
+  selector:
+    app: nestjs
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http

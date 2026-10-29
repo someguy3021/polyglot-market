@@ -44,3 +44,6 @@ Thumbs.db
 .vscode/*
 !.vscode/extensions.json
 frontend/angular/public/config.js
+
+# k8s-стенд (мосты, локальные pid)
+.k8s/

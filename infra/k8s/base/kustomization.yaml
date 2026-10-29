@@ -1,0 +1,13 @@
+# Kustomize-набор стенда (фича 18). CRD Middleware применяется СНАЧАЛА отдельным
+# apply (см. scripts/k8s.mjs) — иначе Middleware в traefik.yaml не пройдёт валидацию.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: polyglot
+resources:
+  - namespace.yaml
+  - traefik.yaml
+  - postgres.yaml
+  - s3.yaml
+  - nestjs.yaml
+  - react.yaml
+  - ingress.yaml

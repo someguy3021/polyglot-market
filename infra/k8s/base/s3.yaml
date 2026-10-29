@@ -1,0 +1,92 @@
+# dev-S3 стенда: s3rver (ADR-008 — minio/minio не пуллится). Тот же S3 API.
+# NodePort 30002 проброшен на хост как 59002: сид с хоста и браузерные URL картинок.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: s3
+  namespace: polyglot
+  labels:
+    app: s3
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: s3
+  template:
+    metadata:
+      labels:
+        app: s3
+    spec:
+      containers:
+        - name: s3
+          image: localhost:5001/pm-s3rver:k8s
+          imagePullPolicy: IfNotPresent # локальная сборка в локальном registry (ADR-012)
+          env:
+            - name: S3_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: polyglot-secrets
+                  key: s3-access-key
+            - name: S3_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: polyglot-secrets
+                  key: s3-secret-key
+          ports:
+            - name: s3
+              containerPort: 9000
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests:
+              cpu: 50m
+              memory: 96Mi
+            limits:
+              memory: 256Mi
+          readinessProbe:
+            tcpSocket:
+              port: s3
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: s3
+            initialDelaySeconds: 15
+            periodSeconds: 10
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: s3data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: s3data
+  namespace: polyglot
+  labels:
+    app: s3
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: s3
+  namespace: polyglot
+  labels:
+    app: s3
+spec:
+  type: NodePort
+  selector:
+    app: s3
+  ports:
+    - name: s3
+      port: 9000
+      targetPort: s3
+      nodePort: 30002

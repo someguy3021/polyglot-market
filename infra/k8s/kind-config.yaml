@@ -1,0 +1,28 @@
+# kind-кластер k8s-стенда (фича 18, ADR-012): один control-plane, порты наружу.
+# Поднимается скриптом scripts/k8s.mjs (pnpm k8s:up); порты слушает docker-proxy
+# в WSL, на Windows пробрасываются автоматически (при сбое — мост из k8s.mjs).
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: polyglot
+# Локальный registry (контейнер kind-registry, см. scripts/k8s.mjs): образы
+# пушатся с хоста в localhost:5001, ноды кластера тянут через зеркало из сети kind.
+# Прямой kind load не работает на docker 29 с containerd image store (session 10).
+containerdConfigPatches:
+  - |-
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:5001"]
+      endpoint = ["http://kind-registry:5000"]
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      - containerPort: 30080 # Traefik ingress (nodePort) — http://localhost:8080
+        hostPort: 8080
+        listenAddress: "0.0.0.0"
+        protocol: TCP
+      - containerPort: 30432 # postgres (nodePort) — 127.0.0.1:55432 (миграции/сиды с хоста)
+        hostPort: 55432
+        listenAddress: "0.0.0.0"
+        protocol: TCP
+      - containerPort: 30002 # S3 s3rver (nodePort) — 127.0.0.1:59002 (сид-картинки, браузерные URL)
+        hostPort: 59002
+        listenAddress: "0.0.0.0"
+        protocol: TCP

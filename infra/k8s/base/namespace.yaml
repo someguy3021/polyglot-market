@@ -1,0 +1,7 @@
+# Namespace стенда. Несущие ресурсы (deployments/services/ingress) — в base/.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: polyglot
+  labels:
+    app.kubernetes.io/part-of: polyglot-market

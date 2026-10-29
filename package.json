@@ -26,6 +26,9 @@
     "serve-backend": "node scripts/serve-backend.mjs",
     "docker:up": "node scripts/combo.mjs",
     "docker:down": "node scripts/combo-down.mjs",
+    "k8s:up": "node scripts/k8s.mjs up",
+    "k8s:down": "node scripts/k8s.mjs down",
+    "k8s:status": "node scripts/k8s.mjs status",
     "check:all": "node scripts/check-all.mjs",
     "e2e:matrix": "node scripts/e2e-matrix.mjs"
   },

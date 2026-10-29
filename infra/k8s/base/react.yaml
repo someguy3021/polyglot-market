@@ -1,0 +1,64 @@
+# SPA-фронт стенда (react — флагман, фича 08): тот же образ, что в docker-комбо.
+# API_URL указывает на ingress (:8080/api) — браузер ходит в API через Traefik.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: react
+  namespace: polyglot
+  labels:
+    app: react
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: react
+  template:
+    metadata:
+      labels:
+        app: react
+    spec:
+      containers:
+        - name: react
+          image: localhost:5001/infra-react:k8s
+          imagePullPolicy: IfNotPresent # локальная сборка в локальном registry (ADR-012)
+          env:
+            - name: API_URL
+              value: http://127.0.0.1:8080/api
+            - name: PORT
+              value: "80"
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 30m
+              memory: 64Mi
+            limits:
+              memory: 192Mi
+          readinessProbe: # serve.mjs отдаёт index.html на любой GET
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: react
+  namespace: polyglot
+  labels:
+    app: react
+spec:
+  selector:
+    app: react
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
