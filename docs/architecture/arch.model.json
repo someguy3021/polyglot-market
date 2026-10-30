@@ -41,6 +41,15 @@
       "why": "Корень композиции Laravel: провайдеры связывают слои"
     },
 
+    "spring4/backend": {
+      "path": "backend/spring4/src/**",
+      "why": "Java-бекенд Boot 4 (ADR-015): слои Clean выражены суффиксами классов внутри пакетов фич — одна роль, пока глоб-DSL devst не умеет несколько путей на роль (open-questions)"
+    },
+    "spring27/backend": {
+      "path": "backend/spring27/src/**",
+      "why": "Java-бекенд Boot 2.7 легаси (ADR-015): аналогично spring4"
+    },
+
     "quasar/app": { "path": "frontend/vue-quasar/src/app/**", "why": "FSD-слой app: App.vue, main, router" },
     "quasar/pages": { "path": "frontend/vue-quasar/src/pages/**", "slices": true, "why": "FSD-слой pages: экраны-слайсы, горизонталь запрещена" },
     "quasar/shared": { "path": "frontend/vue-quasar/src/shared/**", "why": "FSD-слой shared: api-клиент, сторы" },
@@ -80,6 +89,9 @@
     "laravel/infrastructure": ["laravel/application", "laravel/domain"],
     "laravel/presentation": ["laravel/application", "laravel/domain"],
     "laravel/composition": ["laravel/application", "laravel/domain", "laravel/infrastructure", "laravel/presentation"],
+
+    "spring4/backend": [],
+    "spring27/backend": [],
 
     "quasar/app": ["quasar/pages", "quasar/shared"],
     "quasar/pages": ["quasar/shared"],

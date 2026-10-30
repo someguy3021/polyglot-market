@@ -18,7 +18,7 @@
 
 - [01-overview.md](./architecture/01-overview.md) — слои, порты, поток запуска, blueprint
 - [02-arch-roles.md](./architecture/02-arch-roles.md) — канон arch-модели (генерируется из arch.model.json, не править руками)
-- [arch.model.json](./architecture/arch.model.json) — модель границ: 26 ролей, Clean-бекенды, FSD-фронты (ADR-014)
+- [arch.model.json](./architecture/arch.model.json) — модель границ: 32 роли (вкл. spring4/spring27), Clean-бекенды, FSD-фронты (ADR-014, ADR-015)
 
 ### `features/` — как работают фичи (сценарии)
 

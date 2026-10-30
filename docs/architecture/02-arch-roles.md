@@ -19,6 +19,8 @@
 | laravel/infrastructure | backend/laravel/app/Infrastructure/** | — | Clean: адаптеры; пока пусто — матрица охраняет направление на будущее |
 | laravel/presentation | backend/laravel/app/Http/** | — | Clean: HTTP-слой Laravel — контроллеры, Requests, Resources, Middleware |
 | laravel/composition | backend/laravel/app/Providers/** | — | Корень композиции Laravel: провайдеры связывают слои |
+| spring4/backend | backend/spring4/src/** | — | Java-бекенд Boot 4 (ADR-015): слои Clean выражены суффиксами классов внутри пакетов фич — одна роль, пока глоб-DSL devst не умеет несколько путей на роль (open-questions) |
+| spring27/backend | backend/spring27/src/** | — | Java-бекенд Boot 2.7 легаси (ADR-015): аналогично spring4 |
 | quasar/app | frontend/vue-quasar/src/app/** | — | FSD-слой app: App.vue, main, router |
 | quasar/pages | frontend/vue-quasar/src/pages/** | slices (горизонтали слайсов запрещены) | FSD-слой pages: экраны-слайсы, горизонталь запрещена |
 | quasar/shared | frontend/vue-quasar/src/shared/** | — | FSD-слой shared: api-клиент, сторы |
