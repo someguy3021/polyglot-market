@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Category;
+use App\Domain\Models\Category;
 
 class CategoryResource extends ContractResource
 {

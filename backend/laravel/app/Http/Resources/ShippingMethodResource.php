@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use App\Models\ShippingMethod;
+use App\Domain\Models\ShippingMethod;
 
 class ShippingMethodResource extends ContractResource
 {

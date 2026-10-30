@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Order;
+use App\Domain\Models\Order;
 
 class OrderResource extends ContractResource
 {

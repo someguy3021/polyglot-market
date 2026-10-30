@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use App\Models\PromoCode;
+use App\Domain\Models\PromoCode;
 
 class PromoCodeResource extends ContractResource
 {

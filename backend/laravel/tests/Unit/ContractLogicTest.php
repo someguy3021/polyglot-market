@@ -2,8 +2,8 @@
 
 namespace Tests\Unit;
 
-use App\Models\Order;
-use App\Models\PromoCode;
+use App\Domain\Models\Order;
+use App\Domain\Models\PromoCode;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 /**

@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Product;
+use App\Domain\Models\Product;
 
 class ProductResource extends ContractResource
 {

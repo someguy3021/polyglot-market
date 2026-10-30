@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use App\Models\User;
+use App\Domain\Models\User;
 
 class UserResource extends ContractResource
 {

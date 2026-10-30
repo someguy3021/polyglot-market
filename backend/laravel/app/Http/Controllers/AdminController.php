@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Resources\ContractResource;
 use App\Http\Resources\PromoCodeResource;
 use App\Http\Resources\UserResource;
-use App\Models\Order;
-use App\Models\PromoCode;
-use App\Models\User;
+use App\Domain\Models\Order;
+use App\Domain\Models\PromoCode;
+use App\Domain\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

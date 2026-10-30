@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use App\Models\ProductImage;
+use App\Domain\Models\ProductImage;
 
 class ProductImageResource extends ContractResource
 {

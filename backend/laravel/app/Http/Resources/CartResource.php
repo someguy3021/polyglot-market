@@ -2,7 +2,7 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Cart;
+use App\Domain\Models\Cart;
 
 class CartResource extends ContractResource
 {

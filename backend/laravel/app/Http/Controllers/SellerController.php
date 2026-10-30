@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ContractResource;
 use App\Http\Resources\ProductResource;
-use App\Models\Product;
-use App\Models\ProductImage;
+use App\Domain\Models\Product;
+use App\Domain\Models\ProductImage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -128,7 +128,7 @@ class SellerController extends Controller
             'page' => 'integer|min:1',
             'perPage' => 'integer|min:1|max:100',
         ]);
-        $page = \App\Models\OrderItem::query()
+        $page = \App\Domain\Models\OrderItem::query()
             ->where('seller_id', $request->user()->id)
             ->with('order')
             ->orderByDesc('id')

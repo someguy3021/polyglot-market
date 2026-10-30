@@ -4,12 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\OrderResource;
 use App\Http\Resources\ShippingMethodResource;
-use App\Models\IdempotencyKey;
-use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\PromoCode;
-use App\Models\ShippingMethod;
-use App\Models\Product;
+use App\Domain\Models\IdempotencyKey;
+use App\Domain\Models\Order;
+use App\Domain\Models\OrderItem;
+use App\Domain\Models\PromoCode;
+use App\Domain\Models\ShippingMethod;
+use App\Domain\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
