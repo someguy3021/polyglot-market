@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import { api } from "../api";
+import { api } from "../shared/api";
 
 export default {
   name: "OrdersPage",

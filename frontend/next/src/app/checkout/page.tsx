@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { api, errorMessage, setOrderIdempotencyKey } from "@/lib/client-api";
+import { api, errorMessage, setOrderIdempotencyKey } from "@/shared/client-api";
 
 interface ShippingMethod { code: string; name: string; price: number; etaDays: number }
 interface PromoView { code: string; valid: boolean; discount: number }

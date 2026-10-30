@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { addToCart, cart } from '$lib/session.svelte';
+  import { addToCart, cart } from '$shared/session.svelte';
 
   let { data } = $props();
 

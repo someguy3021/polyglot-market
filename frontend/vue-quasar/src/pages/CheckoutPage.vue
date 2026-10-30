@@ -62,8 +62,8 @@
 import { computed, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
-import { api, call, errorMessage, setOrderIdempotencyKey } from "../api/client";
-import { useCart } from "../stores/cart";
+import { api, call, errorMessage, setOrderIdempotencyKey } from "../shared/api/client";
+import { useCart } from "../shared/stores/cart";
 
 interface ShippingMethod { code: string; name: string; price: number; etaDays: number }
 interface PromoView { code: string; valid: boolean; discount: number }

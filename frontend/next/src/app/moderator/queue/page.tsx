@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api, errorMessage } from "@/lib/client-api";
+import { api, errorMessage } from "@/shared/client-api";
 
 export default function ModeratorQueuePage() {
   const [queue, setQueue] = useState<Array<any>>([]);

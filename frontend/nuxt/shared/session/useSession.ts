@@ -1,6 +1,6 @@
 // Сессия: useState (SSR-безопасный) + localStorage-токены на клиенте.
 // Клиент API создаётся на вызов (useApi() — композабл с runtime-config), не на уровне модуля.
-import { errorMessage, setOrderIdempotencyKey, useApi } from "./useApi";
+import { errorMessage, setOrderIdempotencyKey, useApi } from "../api/useApi";
 
 export interface SessionUser {
   id: string;

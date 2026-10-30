@@ -1,6 +1,6 @@
 import { Component, inject } from "@angular/core";
 import { Router, RouterLink, RouterOutlet } from "@angular/router";
-import { SessionService } from "./session.service";
+import { SessionService } from "./shared/session.service";
 
 @Component({
   selector: "app-root",

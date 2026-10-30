@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import { api, setOrderIdempotencyKey } from "../api";
+import { api, setOrderIdempotencyKey } from "../shared/api";
 
 export default {
   name: "CheckoutPage",

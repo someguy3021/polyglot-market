@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { login, register } from '$lib/session.svelte';
-  import { errorMessage } from '$lib/api';
+  import { login, register } from '$shared/session.svelte';
+  import { errorMessage } from '$shared/api';
 
   let { mode = 'login' }: { mode?: 'login' | 'register' } = $props();
 

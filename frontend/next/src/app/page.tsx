@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { fetchCatalog, money } from "@/lib/server-api";
+import { fetchCatalog, money } from "@/shared/server-api";
 
 // RSC: каталог читается на сервере напрямую (revalidate 0 — всегда свежий)
 export default async function CatalogPage({

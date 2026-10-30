@@ -67,7 +67,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue";
 import { useQuasar } from "quasar";
-import { api, call, errorMessage } from "../api/client";
+import { api, call, errorMessage } from "../shared/api/client";
 
 interface SellerProduct {
   id: string;

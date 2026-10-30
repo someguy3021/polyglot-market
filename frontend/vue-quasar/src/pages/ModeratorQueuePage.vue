@@ -41,7 +41,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { useQuasar } from "quasar";
-import { api, call, errorMessage } from "../api/client";
+import { api, call, errorMessage } from "../shared/api/client";
 
 interface QueueItem {
   id: string;

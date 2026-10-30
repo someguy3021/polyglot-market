@@ -26,9 +26,9 @@
 import { computed, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useQuasar } from "quasar";
-import { errorMessage } from "../api/client";
-import { useSession } from "../stores/session";
-import { useCart } from "../stores/cart";
+import { errorMessage } from "../shared/api/client";
+import { useSession } from "../shared/stores/session";
+import { useCart } from "../shared/stores/cart";
 
 const route = useRoute();
 const router = useRouter();

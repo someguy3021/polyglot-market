@@ -3,7 +3,7 @@
 // Карточка товара: клиентский компонент на SDK (добавление в корзину).
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { api, errorMessage } from "@/lib/client-api";
+import { api, errorMessage } from "@/shared/client-api";
 
 interface ProductView {
   id: string;

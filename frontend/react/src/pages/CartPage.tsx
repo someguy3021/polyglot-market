@@ -4,8 +4,8 @@ import { List, ListItem, ListItemAvatar, ListItemText, Avatar, IconButton, Typog
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { errorMessage } from "../api";
-import { useApp } from "../store";
+import { errorMessage } from "../shared/api";
+import { useApp } from "../shared/store";
 
 export default function CartPage() {
   const { cart, loadCart, setQty, removeItem } = useApp();

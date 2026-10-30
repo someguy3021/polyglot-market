@@ -36,8 +36,8 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import { useQuasar } from "quasar";
-import { errorMessage } from "../api/client";
-import { useCart, type CartItemView } from "../stores/cart";
+import { errorMessage } from "../shared/api/client";
+import { useCart, type CartItemView } from "../shared/stores/cart";
 
 const $q = useQuasar();
 const cart = useCart();

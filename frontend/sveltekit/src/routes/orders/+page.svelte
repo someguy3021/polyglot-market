@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { api } from '$lib/api';
+  import { api } from '$shared/api';
 
   let orders = $state<Array<any>>([]);
   let loaded = $state(false);

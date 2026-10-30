@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { api, errorMessage } from '$lib/api';
-  import { cart, loadCart } from '$lib/session.svelte';
+  import { api, errorMessage } from '$shared/api';
+  import { cart, loadCart } from '$shared/session.svelte';
 
   let error = $state('');
 

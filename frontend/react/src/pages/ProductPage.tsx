@@ -3,8 +3,8 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardMedia, Typography, Button, TextField, Skeleton, Chip as StockBadge } from "@mui/material";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
-import { api, errorMessage } from "../api";
-import { useApp } from "../store";
+import { api, errorMessage } from "../shared/api";
+import { useApp } from "../shared/store";
 
 interface ProductView {
   id: string;

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { api, errorMessage } from '$lib/api';
+  import { api, errorMessage } from '$shared/api';
 
   interface QueueItem {
     id: string; title: string; price: number; seller: { shopName: string };

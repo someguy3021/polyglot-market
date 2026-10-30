@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/stores';
-  import { session, cart, logout } from '$lib/session.svelte';
+  import { session, cart, logout } from '$shared/session.svelte';
   import { goto } from '$app/navigation';
 
   let { children } = $props();

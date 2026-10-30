@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Card, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel, TextField, Button, Typography, Chip, Alert } from "@mui/material";
-import { api, errorMessage, setOrderIdempotencyKey } from "../api";
-import { useApp } from "../store";
+import { api, errorMessage, setOrderIdempotencyKey } from "../shared/api";
+import { useApp } from "../shared/store";
 
 interface ShippingMethod { code: string; name: string; price: number; etaDays: number }
 interface PromoView { code: string; valid: boolean; discount: number }

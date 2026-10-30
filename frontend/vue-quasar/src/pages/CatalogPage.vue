@@ -70,8 +70,8 @@
 import { onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useQuasar } from "quasar";
-import { api, call, errorMessage } from "../api/client";
-import { useCart } from "../stores/cart";
+import { api, call, errorMessage } from "../shared/api/client";
+import { useCart } from "../shared/stores/cart";
 
 interface ProductCard {
   id: string;

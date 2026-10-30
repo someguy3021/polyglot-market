@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, Typography, Chip } from "@mui/material";
-import { api } from "../api";
+import { api } from "../shared/api";
 
 interface OrderView {
   id: string;

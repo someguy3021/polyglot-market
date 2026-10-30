@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api, errorMessage } from "@/lib/client-api";
+import { api, errorMessage } from "@/shared/client-api";
 
 interface SellerProduct {
   id: string; title: string; price: number; stock: number;

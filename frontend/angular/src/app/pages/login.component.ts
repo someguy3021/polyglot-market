@@ -1,6 +1,6 @@
 import { Component, inject, signal } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { SessionService, errorMessage } from "../session.service";
+import { SessionService, errorMessage } from "../shared/session.service";
 
 @Component({
   selector: "app-login",

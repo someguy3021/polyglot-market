@@ -1,4 +1,4 @@
-import { api } from '$lib/api';
+import { api } from '$shared/api';
 
 // SSR + клиент: товар грузится в load (абсолютный API_URL из env на сервере);
 // без load у страницы нет data.id, а $effect на сервере не выполняется — страница

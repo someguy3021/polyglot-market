@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import { api } from "../api";
+import { api } from "../shared/api";
 
 const TRANSITIONS = {
   new: ["paid", "cancelled"],

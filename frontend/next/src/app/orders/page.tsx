@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api } from "@/lib/client-api";
+import { api } from "@/shared/client-api";
 
 interface OrderView {
   id: string;

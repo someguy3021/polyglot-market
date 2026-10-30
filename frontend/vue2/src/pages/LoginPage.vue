@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import { errorMessage } from "../api";
+import { errorMessage } from "../shared/api";
 
 export default {
   name: "LoginPage",

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Card, TextField, Button, Typography, Alert } from "@mui/material";
-import { errorMessage } from "../api";
-import { useApp } from "../store";
+import { errorMessage } from "../shared/api";
+import { useApp } from "../shared/store";
 
 export default function AuthPage({ mode }: { mode: "login" | "register" }) {
   const isRegister = mode === "register";

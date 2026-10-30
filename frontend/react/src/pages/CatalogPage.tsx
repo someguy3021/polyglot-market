@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardMedia, CardContent, CardActions, Grid2 as Grid, TextField, MenuItem, Button, Typography, Chip as StockBadge, Pagination, Skeleton, Alert } from "@mui/material";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
-import { api, errorMessage } from "../api";
-import { useApp } from "../store";
+import { api, errorMessage } from "../shared/api";
+import { useApp } from "../shared/store";
 
 interface ProductCard {
   id: string;

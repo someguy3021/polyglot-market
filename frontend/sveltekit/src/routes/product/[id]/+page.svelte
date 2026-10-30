@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { addToCart } from '$lib/session.svelte';
+  import { addToCart } from '$shared/session.svelte';
 
   let { data } = $props();
 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Table, TableBody, TableCell, TableHead, TableRow, Typography, Dialog, DialogTitle, DialogContent, TextField, DialogActions } from "@mui/material";
-import { api, errorMessage } from "../api";
+import { api, errorMessage } from "../shared/api";
 
 interface QueueItem {
   id: string;

@@ -1,4 +1,4 @@
-import { api } from '$lib/api';
+import { api } from '$shared/api';
 
 // SSR + клиент: load исполняется на сервере (абсолютный API_URL из env) и на клиенте
 export const load = async ({ url }) => {

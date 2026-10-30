@@ -1,5 +1,5 @@
 import { Component, inject, signal } from "@angular/core";
-import { SessionService, errorMessage } from "../session.service";
+import { SessionService, errorMessage } from "../shared/session.service";
 
 interface AdminOrder {
   id: string;

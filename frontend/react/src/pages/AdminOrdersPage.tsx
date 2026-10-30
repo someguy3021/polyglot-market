@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MenuItem, Select, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
-import { api, errorMessage } from "../api";
+import { api, errorMessage } from "../shared/api";
 
 interface AdminOrder {
   id: string;

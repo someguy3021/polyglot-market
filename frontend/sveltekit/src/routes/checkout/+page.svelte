@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import { api, errorMessage, setOrderIdempotencyKey } from '$lib/api';
-  import { cart, loadCart } from '$lib/session.svelte';
+  import { api, errorMessage, setOrderIdempotencyKey } from '$shared/api';
+  import { cart, loadCart } from '$shared/session.svelte';
 
   let shipping = $state<Array<{ code: string; name: string; price: number; etaDays: number }>>([]);
   let method = $state('');

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { api, errorMessage } from '$lib/api';
+  import { api, errorMessage } from '$shared/api';
 
   interface AdminOrder {
     id: string; status: string; total: number; createdAt: string;

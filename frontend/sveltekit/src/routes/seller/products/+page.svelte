@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { api, errorMessage } from '$lib/api';
+  import { api, errorMessage } from '$shared/api';
 
   interface SellerProduct {
     id: string; title: string; price: number; stock: number;

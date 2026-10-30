@@ -1,6 +1,6 @@
 import { Component, inject, signal } from "@angular/core";
 import { Router } from "@angular/router";
-import { SessionService, errorMessage } from "../session.service";
+import { SessionService, errorMessage } from "../shared/session.service";
 
 interface ShippingMethod { code: string; name: string; price: number; etaDays: number }
 

@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import { api, errorMessage } from "../api";
+import { api, errorMessage } from "../shared/api";
 
 export default {
   name: "ProductPage",

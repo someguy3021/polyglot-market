@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { OrderStatus } from "@showcase/api-client";
-import { api, errorMessage } from "@/lib/client-api";
+import { api, errorMessage } from "@/shared/client-api";
 
 interface AdminOrder {
   id: string; status: string; total: number; createdAt: string;

@@ -4,6 +4,10 @@ import adapter from "@sveltejs/adapter-node";
 const config = {
   kit: {
     adapter: adapter(),
+    // FSD (ADR-014): $lib переехал в $shared (слой shared); routes остаются слоем pages
+    alias: {
+      $shared: "src/shared",
+    },
   },
 };
 

@@ -3,7 +3,7 @@
 // Корзина: клиентский компонент на SDK (токен/гость в localStorage)
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { api, errorMessage } from "@/lib/client-api";
+import { api, errorMessage } from "@/shared/client-api";
 
 interface CartItem {
   id: string;
