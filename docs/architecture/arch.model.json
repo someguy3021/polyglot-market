@@ -41,13 +41,73 @@
       "why": "Корень композиции Laravel: провайдеры связывают слои"
     },
 
-    "spring4/backend": {
-      "path": "backend/spring4/src/**",
-      "why": "Java-бекенд Boot 4 (ADR-015): слои Clean выражены суффиксами классов внутри пакетов фич — одна роль, пока глоб-DSL devst не умеет несколько путей на роль (open-questions)"
+    "spring4/domain": {
+      "path": [
+        "backend/spring4/src/**/*Row.java",
+        "backend/spring4/src/**/*View*.java",
+        "backend/spring4/src/**/ContractException.java",
+        "backend/spring4/src/**/PageMeta.java",
+        "backend/spring4/src/**/PageResponse.java"
+      ],
+      "why": "Clean: строки БД, формы контракта, контрактная ошибка, пагинация — ни от кого не зависят (ADR-015). Слои по суффиксам классов внутри фича-пакетов — массив глобов (DSL devst, сессия 54)"
     },
-    "spring27/backend": {
+    "spring4/application": {
+      "path": "backend/spring4/src/**/*Service.java",
+      "why": "Clean: use-cases; JdbcTemplate-репозитории инжектятся напрямую — приложение зависит от infrastructure (прагматичный Clean, ADR-015)"
+    },
+    "spring4/infrastructure": {
+      "path": [
+        "backend/spring4/src/**/*Repository.java",
+        "backend/spring4/src/**/S3Storage.java",
+        "backend/spring4/src/**/ImageThumbs.java",
+        "backend/spring4/src/**/S3Props.java"
+      ],
+      "why": "Clean: SQL-репозитории, S3-адаптер, превью, конфиг S3"
+    },
+    "spring4/presentation": {
+      "path": [
+        "backend/spring4/src/**/*Controller.java",
+        "backend/spring4/src/**/AuthFilter.java",
+        "backend/spring4/src/**/RolesInterceptor.java",
+        "backend/spring4/src/**/CurrentUserArgumentResolver.java",
+        "backend/spring4/src/**/CurrentUser.java",
+        "backend/spring4/src/**/Roles.java",
+        "backend/spring4/src/**/ApiExceptionHandler.java"
+      ],
+      "why": "Clean: HTTP-слой — контроллеры, Bearer-фильтр, роли-интерсептор, резолвер пользователя, обработчик ошибок контракта"
+    },
+    "spring4/composition": {
+      "path": [
+        "backend/spring4/src/**/Spring4Application.java",
+        "backend/spring4/src/**/WebConfig.java"
+      ],
+      "why": "Корень композиции: main + CORS/интерсепторы"
+    },
+
+    "spring27/domain": {
       "path": "backend/spring27/src/**",
-      "why": "Java-бекенд Boot 2.7 легаси (ADR-015): аналогично spring4"
+      "suffixes": ["Row", "View", "Views", "Exception", "Meta", "Response"],
+      "why": "Clean: строки БД, формы контракта, контрактная ошибка, пагинация (ADR-015). Суффикс-роли на одном глобе — DSL devst, сессия 54; суффиксы непересекающиеся"
+    },
+    "spring27/application": {
+      "path": "backend/spring27/src/**",
+      "suffixes": ["Service"],
+      "why": "Clean: use-cases; репозитории инжектятся напрямую — зависит от infrastructure (прагматичный Clean, ADR-015)"
+    },
+    "spring27/infrastructure": {
+      "path": "backend/spring27/src/**",
+      "suffixes": ["Repository", "Storage", "Thumbs", "Props"],
+      "why": "Clean: SQL-репозитории, S3-адаптер, превью, конфиг S3"
+    },
+    "spring27/presentation": {
+      "path": "backend/spring27/src/**",
+      "suffixes": ["Controller", "Filter", "Interceptor", "Resolver", "Advice", "Handler", "CurrentUser", "Roles"],
+      "why": "Clean: HTTP-слой — контроллеры, Bearer-фильтр, роли-интерсептор, резолвер, обработчик ошибок контракта"
+    },
+    "spring27/composition": {
+      "path": "backend/spring27/src/**",
+      "suffixes": ["Application", "Config"],
+      "why": "Корень композиции: main + CORS/интерсепторы"
     },
 
     "quasar/app": { "path": "frontend/vue-quasar/src/app/**", "why": "FSD-слой app: App.vue, main, router" },
@@ -90,8 +150,17 @@
     "laravel/presentation": ["laravel/application", "laravel/domain"],
     "laravel/composition": ["laravel/application", "laravel/domain", "laravel/infrastructure", "laravel/presentation"],
 
-    "spring4/backend": [],
-    "spring27/backend": [],
+    "spring4/domain": [],
+    "spring4/application": ["spring4/domain", "spring4/infrastructure"],
+    "spring4/infrastructure": ["spring4/domain"],
+    "spring4/presentation": ["spring4/application", "spring4/domain", "spring4/infrastructure"],
+    "spring4/composition": ["spring4/application", "spring4/domain", "spring4/infrastructure", "spring4/presentation"],
+
+    "spring27/domain": [],
+    "spring27/application": ["spring27/domain", "spring27/infrastructure"],
+    "spring27/infrastructure": ["spring27/domain"],
+    "spring27/presentation": ["spring27/application", "spring27/domain", "spring27/infrastructure"],
+    "spring27/composition": ["spring27/application", "spring27/domain", "spring27/infrastructure", "spring27/presentation"],
 
     "quasar/app": ["quasar/pages", "quasar/shared"],
     "quasar/pages": ["quasar/shared"],

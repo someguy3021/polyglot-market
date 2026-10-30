@@ -47,3 +47,10 @@
 - Предложил черновик: грубые роли `spring4/backend` (backend/spring4/src/**) и `spring27/backend` (backend/spring27/src/**), рёбра пустые (самодостаточны; кросс-импорты запрещены default-deny). Слои Clean в Java-коде — суффиксами классов внутри фича-пакетов, а глоб-DSL devst не умеет несколько путей на роль (дыра уже была в open-questions автору devst).
 - > **Верифицировано @author 2026-10-30: «Верифицирую — вноси».** (выбор варианта в диалоге)
 - Внесено: модель 30→32 роли, `arch check` — границ соблюдено, покрытие **38% → 57%** (362 файла вне ролей), `arch canon` перегенерировал 02-arch-roles.md. Open-questions: активный вопрос закрыт, вместо него — дыра DSL автору devst. Roadmap 5.5 — чекбокс закрыт.
+
+## Дополнение 2 (2026-10-30, вечер): переслайка arch-модели — DSL devst доехал
+
+- Автор devst ответил на наш отчёт (research/…глоб-dsl…): брейсы `{a,b}` — cc13725 от сегодня; массив путей, суффиксы, byGlob — деплой сессии 54; суффикс-роли на одном глобе легальны при непересекающихся суффиксах; переложка кода не нужна, open-questions закрывать.
+- Проверено эмпирически: деплойный бинарь 21:27 (v1.11) съел массив глобов и поле `suffixes` без ошибок; `arch map --json` отдаёт `byGlob`-раскладку.
+- Модель: грубые `spring4/backend`/`spring27/backend` → по 5 ролей на бекенд. spring4 — массивами полных глобов (рецепт автора), spring27 — суффикс-ролями (`Row/View/Views/Exception/Meta/Response` → domain; `Service` → application; `Repository/Storage/Thumbs/Props` → infrastructure; `Controller/Filter/Interceptor/Resolver/Advice/Handler/CurrentUser/Roles` → presentation; `Application/Config` → composition). 32→40 ролей.
+- `arch check` — **0 нарушений**, раскладка симметрична 9/7/7/13/2 × 2 = 76/76 java-файлов; матрица охраняет направление слоёв (и честно разрешает `application → infrastructure` — репозитории инжектятся напрямую, помечено в why как прагматичный Clean). Канон перегенерирован. Open-questions: вопрос DSL закрыт (→ Решённые).

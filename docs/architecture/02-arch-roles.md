@@ -19,8 +19,16 @@
 | laravel/infrastructure | backend/laravel/app/Infrastructure/** | — | Clean: адаптеры; пока пусто — матрица охраняет направление на будущее |
 | laravel/presentation | backend/laravel/app/Http/** | — | Clean: HTTP-слой Laravel — контроллеры, Requests, Resources, Middleware |
 | laravel/composition | backend/laravel/app/Providers/** | — | Корень композиции Laravel: провайдеры связывают слои |
-| spring4/backend | backend/spring4/src/** | — | Java-бекенд Boot 4 (ADR-015): слои Clean выражены суффиксами классов внутри пакетов фич — одна роль, пока глоб-DSL devst не умеет несколько путей на роль (open-questions) |
-| spring27/backend | backend/spring27/src/** | — | Java-бекенд Boot 2.7 легаси (ADR-015): аналогично spring4 |
+| spring4/domain | backend/spring4/src/**/*Row.java, backend/spring4/src/**/*View*.java, backend/spring4/src/**/ContractException.java, backend/spring4/src/**/PageMeta.java, backend/spring4/src/**/PageResponse.java | — | Clean: строки БД, формы контракта, контрактная ошибка, пагинация — ни от кого не зависят (ADR-015). Слои по суффиксам классов внутри фича-пакетов — массив глобов (DSL devst, сессия 54) |
+| spring4/application | backend/spring4/src/**/*Service.java | — | Clean: use-cases; JdbcTemplate-репозитории инжектятся напрямую — приложение зависит от infrastructure (прагматичный Clean, ADR-015) |
+| spring4/infrastructure | backend/spring4/src/**/*Repository.java, backend/spring4/src/**/S3Storage.java, backend/spring4/src/**/ImageThumbs.java, backend/spring4/src/**/S3Props.java | — | Clean: SQL-репозитории, S3-адаптер, превью, конфиг S3 |
+| spring4/presentation | backend/spring4/src/**/*Controller.java, backend/spring4/src/**/AuthFilter.java, backend/spring4/src/**/RolesInterceptor.java, backend/spring4/src/**/CurrentUserArgumentResolver.java, backend/spring4/src/**/CurrentUser.java, backend/spring4/src/**/Roles.java, backend/spring4/src/**/ApiExceptionHandler.java | — | Clean: HTTP-слой — контроллеры, Bearer-фильтр, роли-интерсептор, резолвер пользователя, обработчик ошибок контракта |
+| spring4/composition | backend/spring4/src/**/Spring4Application.java, backend/spring4/src/**/WebConfig.java | — | Корень композиции: main + CORS/интерсепторы |
+| spring27/domain | backend/spring27/src/** | суффиксы: Row, View, Views, Exception, Meta, Response | Clean: строки БД, формы контракта, контрактная ошибка, пагинация (ADR-015). Суффикс-роли на одном глобе — DSL devst, сессия 54; суффиксы непересекающиеся |
+| spring27/application | backend/spring27/src/** | суффиксы: Service | Clean: use-cases; репозитории инжектятся напрямую — зависит от infrastructure (прагматичный Clean, ADR-015) |
+| spring27/infrastructure | backend/spring27/src/** | суффиксы: Repository, Storage, Thumbs, Props | Clean: SQL-репозитории, S3-адаптер, превью, конфиг S3 |
+| spring27/presentation | backend/spring27/src/** | суффиксы: Controller, Filter, Interceptor, Resolver, Advice, Handler, CurrentUser, Roles | Clean: HTTP-слой — контроллеры, Bearer-фильтр, роли-интерсептор, резолвер, обработчик ошибок контракта |
+| spring27/composition | backend/spring27/src/** | суффиксы: Application, Config | Корень композиции: main + CORS/интерсепторы |
 | quasar/app | frontend/vue-quasar/src/app/** | — | FSD-слой app: App.vue, main, router |
 | quasar/pages | frontend/vue-quasar/src/pages/** | slices (горизонтали слайсов запрещены) | FSD-слой pages: экраны-слайсы, горизонталь запрещена |
 | quasar/shared | frontend/vue-quasar/src/shared/** | — | FSD-слой shared: api-клиент, сторы |
@@ -62,6 +70,26 @@ graph TD
   laravel_composition --> laravel_domain
   laravel_composition --> laravel_infrastructure
   laravel_composition --> laravel_presentation
+  spring4_application --> spring4_domain
+  spring4_application --> spring4_infrastructure
+  spring4_infrastructure --> spring4_domain
+  spring4_presentation --> spring4_application
+  spring4_presentation --> spring4_domain
+  spring4_presentation --> spring4_infrastructure
+  spring4_composition --> spring4_application
+  spring4_composition --> spring4_domain
+  spring4_composition --> spring4_infrastructure
+  spring4_composition --> spring4_presentation
+  spring27_application --> spring27_domain
+  spring27_application --> spring27_infrastructure
+  spring27_infrastructure --> spring27_domain
+  spring27_presentation --> spring27_application
+  spring27_presentation --> spring27_domain
+  spring27_presentation --> spring27_infrastructure
+  spring27_composition --> spring27_application
+  spring27_composition --> spring27_domain
+  spring27_composition --> spring27_infrastructure
+  spring27_composition --> spring27_presentation
   quasar_app --> quasar_pages
   quasar_app --> quasar_shared
   quasar_pages --> quasar_shared
