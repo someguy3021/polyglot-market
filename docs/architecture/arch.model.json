@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "defaultDeny": true,
+  "roles": {
+    "nest/domain": {
+      "path": "backend/nestjs/src/domain/**",
+      "allowInternalCycles": false,
+      "why": "Clean: сущности и ошибки контракта; не зависят ни от кого"
+    },
+    "nest/application": {
+      "path": "backend/nestjs/src/application/**",
+      "why": "Clean: use-cases (сервисы фич, порты, конфиг); зависят только от domain; Repository<T> TypeORM считается портом к данным"
+    },
+    "nest/infrastructure": {
+      "path": "backend/nestjs/src/infrastructure/**",
+      "why": "Clean: адаптеры — S3-хранилище (реализация порта ImageStorage), логгер"
+    },
+    "nest/presentation": {
+      "path": "backend/nestjs/src/presentation/**",
+      "why": "Clean: HTTP-слой — контроллеры, DTO, гарды, фильтр ошибок, метрики, health"
+    },
+    "laravel/domain": {
+      "path": "backend/laravel/app/Domain/**",
+      "allowInternalCycles": false,
+      "why": "Clean: Eloquent-модели как доменные сущности (прагматичный Clean, ADR-014); не зависят ни от кого"
+    },
+    "laravel/application": {
+      "path": "backend/laravel/app/Application/**",
+      "why": "Clean: use-cases — сервисы (CartResolver и будущие)"
+    },
+    "laravel/infrastructure": {
+      "path": "backend/laravel/app/Infrastructure/**",
+      "why": "Clean: адаптеры; пока пусто — матрица охраняет направление на будущее"
+    },
+    "laravel/presentation": {
+      "path": "backend/laravel/app/Http/**",
+      "why": "Clean: HTTP-слой Laravel — контроллеры, Requests, Resources, Middleware"
+    },
+    "laravel/composition": {
+      "path": "backend/laravel/app/Providers/**",
+      "why": "Корень композиции Laravel: провайдеры связывают слои"
+    },
+
+    "quasar/app": { "path": "frontend/vue-quasar/src/app/**", "why": "FSD-слой app: App.vue, main, router" },
+    "quasar/pages": { "path": "frontend/vue-quasar/src/pages/**", "slices": true, "why": "FSD-слой pages: экраны-слайсы, горизонталь запрещена" },
+    "quasar/shared": { "path": "frontend/vue-quasar/src/shared/**", "why": "FSD-слой shared: api-клиент, сторы" },
+
+    "vue2/app": { "path": "frontend/vue2/src/app/**", "why": "FSD-слой app: App.vue, main, router" },
+    "vue2/pages": { "path": "frontend/vue2/src/pages/**", "slices": true, "why": "FSD-слой pages: экраны-слайсы, горизонталь запрещена" },
+    "vue2/shared": { "path": "frontend/vue2/src/shared/**", "why": "FSD-слой shared: api-клиент, стор" },
+
+    "react/app": { "path": "frontend/react/src/app/**", "why": "FSD-слой app: App, main" },
+    "react/pages": { "path": "frontend/react/src/pages/**", "slices": true, "why": "FSD-слой pages: экраны-слайсы, горизонталь запрещена" },
+    "react/shared": { "path": "frontend/react/src/shared/**", "why": "FSD-слой shared: api-клиент, стор, ui-обёртки" },
+
+    "next/pages": { "path": "frontend/next/src/app/**", "why": "FSD-слой pages: App Router Next — роутинг и экраны (src/app — конвенция Next, ADR-014); slices не включены — файлы маршрута не слайсы, кросс-импорты внутри app/ — идиома фреймворка" },
+    "next/shared": { "path": "frontend/next/src/shared/**", "why": "FSD-слой shared: client/server api-клиенты" },
+
+    "sk/app": { "path": "frontend/sveltekit/src/routes/+layout*", "why": "FSD-слой app: корневая оболочка SvelteKit (+layout)" },
+    "sk/pages": { "path": "frontend/sveltekit/src/routes/**", "slices": true, "why": "FSD-слой pages: маршруты SvelteKit — экраны-слайсы" },
+    "sk/shared": { "path": "frontend/sveltekit/src/shared/**", "why": "FSD-слой shared: api, сессия, ui" },
+
+    "nuxt/app": { "path": "frontend/nuxt/app.vue", "why": "FSD-слой app: корневая оболочка Nuxt" },
+    "nuxt/pages": { "path": "frontend/nuxt/pages/**", "slices": true, "why": "FSD-слой pages: экраны-слайсы" },
+    "nuxt/features": { "path": "frontend/nuxt/features/**", "slices": true, "why": "FSD-слой features: фича auth (форма)" },
+    "nuxt/shared": { "path": "frontend/nuxt/shared/**", "why": "FSD-слой shared: api, сессия (auto-import настраивается в nuxt.config)" },
+
+    "angular/app": { "path": "frontend/angular/src/app/app.*", "why": "FSD-слой app: корневой компонент, конфиг, роуты Angular" },
+    "angular/pages": { "path": "frontend/angular/src/app/pages/**", "slices": true, "why": "FSD-слой pages: экраны-компоненты" },
+    "angular/shared": { "path": "frontend/angular/src/app/shared/**", "why": "FSD-слой shared: сессия-сервис" }
+  },
+  "edges": {
+    "nest/domain": [],
+    "nest/application": ["nest/domain"],
+    "nest/infrastructure": ["nest/application", "nest/domain"],
+    "nest/presentation": ["nest/application", "nest/domain", "nest/infrastructure"],
+
+    "laravel/domain": [],
+    "laravel/application": ["laravel/domain"],
+    "laravel/infrastructure": ["laravel/application", "laravel/domain"],
+    "laravel/presentation": ["laravel/application", "laravel/domain"],
+    "laravel/composition": ["laravel/application", "laravel/domain", "laravel/infrastructure", "laravel/presentation"],
+
+    "quasar/app": ["quasar/pages", "quasar/shared"],
+    "quasar/pages": ["quasar/shared"],
+    "quasar/shared": [],
+
+    "vue2/app": ["vue2/pages", "vue2/shared"],
+    "vue2/pages": ["vue2/shared"],
+    "vue2/shared": [],
+
+    "react/app": ["react/pages", "react/shared"],
+    "react/pages": ["react/shared"],
+    "react/shared": [],
+
+    "next/pages": ["next/shared"],
+    "next/shared": [],
+
+    "sk/app": ["sk/pages", "sk/shared"],
+    "sk/pages": ["sk/shared"],
+    "sk/shared": [],
+
+    "nuxt/app": ["nuxt/pages", "nuxt/features", "nuxt/shared"],
+    "nuxt/pages": ["nuxt/features", "nuxt/shared"],
+    "nuxt/features": ["nuxt/shared"],
+    "nuxt/shared": [],
+
+    "angular/app": ["angular/pages", "angular/shared"],
+    "angular/pages": ["angular/shared"],
+    "angular/shared": []
+  }
+}
