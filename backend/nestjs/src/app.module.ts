@@ -1,17 +1,19 @@
 import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { JwtModule } from "@nestjs/jwt";
-import { AuthModule } from "./auth/auth.module";
-import { HealthController } from "./health.controller";
-import { MetricsController } from "./metrics/metrics.controller";
-import { ShopController } from "./cart/shop.controller";
-import { CartService } from "./cart/cart.service";
-import { CatalogService } from "./catalog/catalog.service";
-import { OrdersController } from "./orders/orders.controller";
-import { OrdersService } from "./orders/orders.service";
-import { SellerController } from "./seller/seller.controller";
-import { SellerService } from "./seller/seller.service";
-import { StaffController } from "./staff/staff.controller";
+import { AuthModule } from "./auth.module";
+import { HealthController } from "./presentation/health.controller";
+import { MetricsController } from "./presentation/metrics/metrics.controller";
+import { ShopController } from "./presentation/cart/shop.controller";
+import { CartService } from "./application/cart/cart.service";
+import { CatalogService } from "./application/catalog/catalog.service";
+import { OrdersController } from "./presentation/orders/orders.controller";
+import { OrdersService } from "./application/orders/orders.service";
+import { SellerController } from "./presentation/seller/seller.controller";
+import { SellerService } from "./application/seller/seller.service";
+import { StaffController } from "./presentation/staff/staff.controller";
+import { StaffService } from "./application/staff/staff.service";
+import { IMAGE_STORAGE_PROVIDER } from "./infrastructure/s3/s3.storage";
 import {
   CartEntity,
   CartItemEntity,
@@ -25,7 +27,7 @@ import {
   SellerProfileEntity,
   ShippingMethodEntity,
   UserEntity,
-} from "./entities/shop.entities";
+} from "./domain/entities/shop.entities";
 
 @Module({
   imports: [
@@ -76,6 +78,6 @@ import {
     AuthModule,
   ],
   controllers: [HealthController, MetricsController, ShopController, OrdersController, SellerController, StaffController],
-  providers: [CartService, CatalogService, OrdersService, SellerService],
+  providers: [CartService, CatalogService, OrdersService, SellerService, StaffService, IMAGE_STORAGE_PROVIDER],
 })
 export class AppModule {}

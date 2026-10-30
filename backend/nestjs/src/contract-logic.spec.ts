@@ -1,7 +1,7 @@
 // Паритет с Laravel ContractLogicTest: одинаковые правила из контракта.
 import { describe, expect, it } from "vitest";
-import { PromoCodeEntity } from "./entities/shop.entities";
-import { OrderEntity } from "./entities/shop.entities";
+import { PromoCodeEntity } from "./domain/entities/shop.entities";
+import { OrderEntity } from "./domain/entities/shop.entities";
 
 function promo(fields: Partial<PromoCodeEntity>): PromoCodeEntity {
   return Object.assign(new PromoCodeEntity(), {

@@ -1,36 +1,13 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
-import { IsIn, IsString, MinLength } from "class-validator";
+// Use-cases модерации и админки: очередь модератора, роли, промокоды.
+// Логика вынесена из контроллера (Clean): контроллер только парсит HTTP и зовёт сервис.
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository, QueryFailedError } from "typeorm";
-import { JwtAuthGuard } from "../auth/jwt-auth.guard";
-import { RolesGuard, Roles } from "../common/roles.guard";
-import { ContractError } from "../contract-exception.filter";
-import { CategoryEntity, ProductEntity, PromoCodeEntity, UserEntity } from "../entities/shop.entities";
-import { serializeProduct, serializePromo, serializeUser } from "../common/serialize";
+import { QueryFailedError, Repository } from "typeorm";
+import { CategoryEntity, ProductEntity, PromoCodeEntity, UserEntity } from "../../domain/entities/shop.entities";
+import { ContractError } from "../../domain/errors/contract.error";
+import { serializeProduct, serializePromo, serializeUser } from "../dto-mappers/serialize";
+import { PromoCodeInputDto, RejectDto, RoleDto } from "./staff.dto";
 
-export class RejectDto {
-  @IsString()
-  @MinLength(4)
-  reason!: string;
-}
-
-export class RoleDto {
-  @IsIn(["buyer", "seller", "moderator", "admin"])
-  role!: "buyer" | "seller" | "moderator" | "admin";
-}
-
-export class PromoCodeInputDto {
-  code!: string;
-  type!: "percent" | "fixed";
-  value!: number;
-  minSubtotal?: number;
-  maxUses?: number;
-  expiresAt?: string;
-}
-
-@Controller()
-@UseGuards(JwtAuthGuard, RolesGuard)
-export class StaffController {
+export class StaffService {
   constructor(
     @InjectRepository(ProductEntity) private readonly products: Repository<ProductEntity>,
     @InjectRepository(UserEntity) private readonly userRepo: Repository<UserEntity>,
@@ -39,28 +16,21 @@ export class StaffController {
 
   // ---------- модерация ----------
 
-  @Get("moderator/queue")
-  @Roles("moderator", "admin")
-  async queue(@Query("page") page = "1", @Query("perPage") perPage = "20") {
-    const p = Number(page);
-    const pp = Math.min(100, Number(perPage));
+  async queue(page: number, perPage: number) {
     const [rows, total] = await this.products.findAndCount({
       where: { status: "pending_moderation" },
       order: { createdAt: "ASC" },
-      skip: (p - 1) * pp,
-      take: pp,
+      skip: (page - 1) * perPage,
+      take: perPage,
     });
     const withRel = await this.loadProductRelations(rows);
     return {
       data: withRel.map((r) => serializeProduct(r.item, r.rel)),
-      meta: { currentPage: p, lastPage: Math.max(1, Math.ceil(total / pp)), perPage: pp, total },
+      meta: { currentPage: page, lastPage: Math.max(1, Math.ceil(total / perPage)), perPage, total },
     };
   }
 
-  @Post("moderator/products/:id/approve")
-  @HttpCode(200)
-  @Roles("moderator", "admin")
-  async approve(@Param("id") id: string) {
+  async approve(id: string) {
     const product = await this.products.findOneBy({ id });
     if (!product) throw new ContractError(404, "not_found", "Product not found.");
     if (product.status !== "pending_moderation") {
@@ -73,10 +43,7 @@ export class StaffController {
     return serializeProduct(withRel.item, withRel.rel);
   }
 
-  @Post("moderator/products/:id/reject")
-  @HttpCode(200)
-  @Roles("moderator", "admin")
-  async reject(@Param("id") id: string, @Body() dto: RejectDto) {
+  async reject(id: string, dto: RejectDto) {
     const product = await this.products.findOneBy({ id });
     if (!product) throw new ContractError(404, "not_found", "Product not found.");
     if (product.status !== "pending_moderation") {
@@ -91,9 +58,7 @@ export class StaffController {
 
   // ---------- админ ----------
 
-  @Put("admin/users/:id/role")
-  @Roles("admin")
-  async updateUserRole(@Param("id") id: string, @Body() dto: RoleDto) {
+  async updateUserRole(id: string, dto: RoleDto) {
     const user = await this.userRepo.findOneBy({ id });
     if (!user) throw new ContractError(404, "not_found", "User not found.");
     user.role = dto.role;
@@ -101,33 +66,25 @@ export class StaffController {
     return serializeUser(user, null);
   }
 
-  @Get("admin/users")
-  @Roles("admin")
-  async users(@Query("page") page = "1", @Query("perPage") perPage = "20", @Query("role") role?: string) {
-    const p = Number(page);
-    const pp = Math.min(100, Number(perPage));
+  async users(page: number, perPage: number, role?: string) {
     const [rows, total] = await this.userRepo.findAndCount({
       where: role ? { role: role as never } : {},
       order: { createdAt: "ASC" },
-      skip: (p - 1) * pp,
-      take: pp,
+      skip: (page - 1) * perPage,
+      take: perPage,
     });
     return {
       data: rows.map((u) => serializeUser(u, null)),
-      meta: { currentPage: p, lastPage: Math.max(1, Math.ceil(total / pp)), perPage: pp, total },
+      meta: { currentPage: page, lastPage: Math.max(1, Math.ceil(total / perPage)), perPage, total },
     };
   }
 
-  @Get("admin/promo-codes")
-  @Roles("admin")
   async promoCodes() {
     const rows = await this.promos.find({ order: { code: "ASC" } });
     return { data: rows.map(serializePromo) };
   }
 
-  @Post("admin/promo-codes")
-  @Roles("admin")
-  async createPromoCode(@Body() dto: PromoCodeInputDto) {
+  async createPromoCode(dto: PromoCodeInputDto) {
     if (dto.type === "percent" && dto.value > 100) {
       throw new ContractError(422, "unprocessable", "Percent discount cannot exceed 100.");
     }
@@ -151,9 +108,7 @@ export class StaffController {
     return serializePromo(promo);
   }
 
-  @Delete("admin/products/:id")
-  @Roles("admin")
-  async deleteProduct(@Param("id") id: string) {
+  async deleteProduct(id: string) {
     const product = await this.products.findOneBy({ id });
     if (!product) throw new ContractError(404, "not_found", "Product not found.");
     try {

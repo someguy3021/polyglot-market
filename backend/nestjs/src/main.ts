@@ -2,9 +2,10 @@ import "reflect-metadata";
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
-import { ContractError, ContractExceptionFilter } from "./contract-exception.filter";
-import { MetricsInterceptor } from "./metrics/metrics.interceptor";
-import { PinoLogger } from "./logger";
+import { ContractError } from "./domain/errors/contract.error";
+import { ContractExceptionFilter } from "./presentation/http/contract-exception.filter";
+import { MetricsInterceptor } from "./presentation/metrics/metrics.interceptor";
+import { PinoLogger } from "./infrastructure/logger";
 
 async function bootstrap() {
   const logger = new PinoLogger("bootstrap");
