@@ -34,6 +34,27 @@ export const APPS: AppSpec[] = [
     present: true,
   },
   {
+    // Java-бекенды (ADR-015): mvnw сам скачивает Maven; панель держит инвариант «≤1 бекенд»
+    key: "spring4",
+    title: "Spring Boot 4 API",
+    kind: "backend",
+    cwd: "backend/spring4",
+    command: "mvnw.cmd -q spring-boot:run -Dspring-boot.run.arguments=--server.port={port}",
+    defaultPort: 8020,
+    healthPath: "/health",
+    present: true,
+  },
+  {
+    key: "spring27",
+    title: "Spring Boot 2.7 API (legacy)",
+    kind: "backend",
+    cwd: "backend/spring27",
+    command: "mvnw.cmd -q spring-boot:run -Dspring-boot.run.arguments=--server.port={port}",
+    defaultPort: 8030,
+    healthPath: "/health",
+    present: true,
+  },
+  {
     key: "quasar",
     title: "Vue 3 + Quasar",
     kind: "frontend",

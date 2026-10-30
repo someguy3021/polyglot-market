@@ -1,0 +1,33 @@
+# spring27 — конфиг локальной демо-среды; значения читаются из корневого .env.
+# Схему БД не трогаем — только общие миграции (ADR-002). Пул потоков Tomcat — как в 2019.
+server:
+  port: ${PORT:8030}
+
+spring:
+  datasource:
+    # stringtype=unspecified: JDBC-строки уходят как unknown — PostgreSQL сам приводит
+    # их к uuid/enum по колонке (иначе "uuid = character varying" не существует)
+    url: jdbc:postgresql://${DB_HOST:127.0.0.1}:${DB_PORT:5432}/${DB_DATABASE:polyglot}?stringtype=unspecified
+    username: ${DB_USERNAME:polyglot}
+    password: ${DB_PASSWORD:secret}
+    hikari:
+      maximum-pool-size: 10
+  servlet:
+    multipart:
+      max-file-size: 6MB   # контракт — 5 МБ; код отдаёт 422 по своей проверке
+      max-request-size: 7MB
+
+jwt:
+  # общий с NestJS/Laravel секрет — токены взаимозаменяемы (HS256, claim sub, 24ч)
+  secret: ${JWT_SECRET:dev-only-secret-change-me-0123456789-abcdef-secret-change-me}
+
+s3:
+  endpoint: ${S3_ENDPOINT:http://127.0.0.1:9002}
+  bucket: ${S3_BUCKET:products}
+  access-key: ${S3_ACCESS_KEY:minioadmin}
+  secret-key: ${S3_SECRET_KEY:minioadmin}
+  url-base: ${S3_URL_BASE:}
+
+logging:
+  level:
+    root: INFO

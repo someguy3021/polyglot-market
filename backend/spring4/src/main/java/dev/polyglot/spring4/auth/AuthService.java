@@ -1,0 +1,47 @@
+package dev.polyglot.spring4.auth;
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import dev.polyglot.spring4.common.ContractException;
+import dev.polyglot.spring4.common.JwtService;
+
+@Service
+public class AuthService {
+
+    public record AuthPayload(String token, UserView user) {
+    }
+
+    private final UsersRepository users;
+    private final JwtService jwt;
+    private final BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder(10);
+
+    public AuthService(UsersRepository users, JwtService jwt) {
+        this.users = users;
+        this.jwt = jwt;
+    }
+
+    public AuthPayload register(String name, String email, String password) {
+        if (users.findByEmail(email).isPresent()) {
+            throw ContractException.validation("The given data was invalid.",
+                    Map.of("email", List.of("The email has already been taken.")));
+        }
+        // $2y-префикс: паритет с Laravel-хешами в общей таблице (как в NestJS auth.service);
+        // в replacement "$" экранируем — иначе regex читает "$2y" как ссылку на группу
+        String hash = bcrypt.encode(password).replaceFirst("^\\$2a\\$", "\\$2y\\$");
+        users.insert(new UsersRepository.UserInsert(email, hash, name, "buyer"));
+        UserRow user = users.findByEmail(email).orElseThrow();
+        return new AuthPayload(jwt.issue(user.id()), UserView.of(user));
+    }
+
+    public AuthPayload login(String email, String password) {
+        // BCryptPasswordEncoder.matches читает $2a/$2b/$2y — хеши из любой из трёх реализаций
+        UserRow user = users.findByEmail(email)
+                .filter(u -> bcrypt.matches(password, u.passwordHash()))
+                .orElseThrow(() -> ContractException.unauthorized("Invalid credentials."));
+        return new AuthPayload(jwt.issue(user.id()), UserView.of(user));
+    }
+}

@@ -3,8 +3,9 @@
 // (ADR-006: активен максимум один), между группами — сквозной кейс handoff (create на
 // Laravel, verify на NestJS). Каждая пара: db:reset → дев-сервер фронта с адресом API →
 // спеки buyer.<front> + roles.<front>.
-//   pnpm e2e:matrix                       — полная матрица 14 пар + handoff
+//   pnpm e2e:matrix                       — полная матрица 14 пар + handoff (laravel+nestjs)
 //   pnpm e2e:matrix --back=laravel        — одна группа бекенда (7 пар)
+//   pnpm e2e:matrix --back=spring4        — Java-бекенд (ADR-015); так же spring27
 //   pnpm e2e:matrix --pairs=9000:8010,4200:3000  — явно выбранные пары
 import { execSync, spawn, spawnSync } from "node:child_process";
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -29,6 +30,9 @@ const FRONTS = [
 const BACKENDS = {
   laravel: { port: 8010, health: "http://127.0.0.1:8010/health" },
   nestjs:  { port: 3000, health: "http://127.0.0.1:3000/health" },
+  // Java-бекенды (ADR-015): сборка через mvnw (сам качает Maven), порт через PORT env
+  spring4:  { port: 8020, health: "http://127.0.0.1:8020/health", dir: "backend/spring4",  jar: "target/spring4-1.0.0.jar" },
+  spring27: { port: 8030, health: "http://127.0.0.1:8030/health", dir: "backend/spring27", jar: "target/spring27-1.0.0.jar" },
 };
 
 const killPort = (port) => {
@@ -56,6 +60,16 @@ async function upBackend(name) {
     const build = spawnSync("pnpm", ["--dir", "backend/nestjs", "build"], { stdio: "inherit", shell: win });
     if (build.status !== 0) throw new Error("nestjs build упал");
     spawn("node", ["dist/main.js"], { cwd: "backend/nestjs", stdio: "ignore", shell: win });
+  } else if (name === "spring4" || name === "spring27") {
+    const mvnw = win ? "mvnw.cmd" : "./mvnw";
+    const build = spawnSync(mvnw, ["-q", "package", "-DskipTests"], { cwd: b.dir, stdio: "inherit", shell: win });
+    if (build.status !== 0) throw new Error(`${name} build упал`);
+    spawn("java", ["-jar", b.jar], {
+      cwd: b.dir,
+      env: { ...process.env, PORT: String(b.port) },
+      stdio: "ignore",
+      shell: win,
+    });
   } else {
     spawn("php", ["artisan", "serve", "--port=8010"], { cwd: "backend/laravel", stdio: "ignore", shell: win });
   }

@@ -2,7 +2,7 @@
   "name": "polyglot-market",
   "version": "0.1.0",
   "private": true,
-  "description": "One API contract — 2 backends — 7 frontends. Marketplace megarepo showcase.",
+  "description": "One API contract — 4 backends (Laravel, NestJS, Spring Boot 4, Spring Boot 2.7 legacy) — 7 frontends. Marketplace megarepo showcase.",
   "packageManager": "pnpm@10.16.1",
   "engines": {
     "node": ">=24"

@@ -37,10 +37,10 @@ const composer = tryCmd("composer", ["--version"]);
 if (composer) ok("Composer", composer.split("\n")[0].slice(0, 60));
 else warn("Composer", "не найден — нужен для Laravel-бекенда");
 
-// Java — только для перегенерации клиентов (ADR-004), рекрутеру не нужна
+// Java — перегенерация клиентов (ADR-004) и Java-бекенды spring4/spring27 (ADR-015)
 const java = tryCmd("java", ["-version"]);
 if (java) ok("Java", java.split("\n")[0]);
-else warn("Java", "не найдена — нужна только для `pnpm generate:clients`");
+else warn("Java", "не найдена — нужны для `pnpm generate:clients` и бекендов spring4/spring27");
 
 if (process.platform === "win32" && !runner) {
   const distro = config.wslDistro || detectWslDistro();
